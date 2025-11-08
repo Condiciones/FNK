@@ -11,20 +11,14 @@
         @font-face {
             font-family: 'DESA';
             src: url('https://raw.githubusercontent.com/novaklar/web/main/DESA.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
         }
         @font-face {
             font-family: 'Poppins-Bold';
             src: url('https://raw.githubusercontent.com/novaklar/web/main/Poppins-Bold.ttf') format('truetype');
-            font-weight: bold;
-            font-style: normal;
         }
         @font-face {
             font-family: 'Poppins-Regular';
             src: url('https://raw.githubusercontent.com/novaklar/web/main/Poppins-Regular.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
         }
         .font-poppins-bold {
             font-family: 'Poppins-Bold', sans-serif;
@@ -37,9 +31,6 @@
         }
         .bg-primary-darker {
             background-color: #004a5c;
-        }
-        .bg-accent-transparent {
-            background-color: rgba(88, 217, 183, 0.3);
         }
         .text-accent {
             color: #58d9b7;
@@ -59,35 +50,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .alert-badge {
-            position: relative;
-        }
-        .alert-badge::after {
-            content: '';
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 12px;
-            height: 12px;
-            background-color: #ef4444;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        /* Colores personalizados para gráficas */
-        .advisor-colors {
-            background-color: #00617a;
-            background-color: #147a80;
-            background-color: #080a33;
-        }
-        .income-expense-colors {
-            background-color: #58d9b7;
-            background-color: #00617a;
-        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4 font-poppins-regular">
@@ -99,9 +61,7 @@
 
     <main class="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 mt-8">
         
-        <!-- Columna izquierda - 5/12 -->
         <div class="md:col-span-5 space-y-6">
-            <!-- Tarjeta de registro de transacción -->
             <div class="bg-white rounded-xl p-6 shadow-lg space-y-4 border border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Registrar Transaccion</h2>
                 <form id="transaction-form" class="space-y-4">
@@ -126,7 +86,6 @@
                 </form>
             </div>
             
-            <!-- Nueva tarjeta: Ventas Totales Manuales (VTM) -->
             <div class="bg-white rounded-xl p-6 shadow-lg space-y-4 border border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">VTM</h2>
                 <form id="manual-sales-form" class="space-y-4">
@@ -144,7 +103,6 @@
                 </div>
             </div>
             
-            <!-- Tarjeta de Notas -->
             <div class="bg-white rounded-xl p-6 shadow-lg space-y-4 border border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Notas</h2>
                 <div id="notes-container" class="p-4 bg-gray-50 rounded-md min-h-[150px]">
@@ -153,7 +111,6 @@
                 </div>
             </div>
 
-            <!-- Tarjeta de Alertas -->
             <div class="bg-white rounded-xl p-6 shadow-lg space-y-4 border border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Alertas</h2>
                 <div id="alerts-container" class="space-y-3">
@@ -161,7 +118,6 @@
                 </div>
             </div>
 
-            <!-- Nueva tarjeta: Ganancias del mes anterior -->
             <div class="bg-white rounded-xl p-6 shadow-lg space-y-4 border border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Ganancias Mes Anterior</h2>
                 <div class="text-center py-4">
@@ -171,9 +127,7 @@
             </div>
         </div>
         
-        <!-- Columna derecha - 7/12 -->
         <div class="md:col-span-7 space-y-6">
-            <!-- Tarjetas de metricas principales -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-primary text-white rounded-xl p-4 shadow-lg text-center transform transition-transform duration-200 hover:scale-105">
                     <p class="text-lg font-medium mb-1">Balance Total</p>
@@ -199,7 +153,6 @@
                     </div>
                 </div>
                 
-                <!-- Nuevos botones de navegación debajo de VT y Crecimiento -->
                 <div class="bg-white rounded-xl p-4 shadow-lg text-center border border-gray-200 transform transition-transform duration-200 hover:scale-105 flex flex-col justify-center">
                     <a href="https://novaklar.github.io/web/" target="_blank" class="text-lg font-medium text-gray-800 hover:text-accent transition-colors duration-200">
                         Afiliados
@@ -212,7 +165,6 @@
                 </div>
             </div>
 
-            <!-- Graficas principales -->
             <div class="grid grid-cols-1 gap-6">
                 <div class="bg-white rounded-xl p-6 shadow-lg text-center border border-gray-200">
                     <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Ingresos vs Egresos</h3>
@@ -224,26 +176,6 @@
                 </div>
             </div>
 
-            <!-- Nueva seccion: Resumen de rendimiento mensual -->
-            <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-                <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Rendimiento Mensual</h3>
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="text-center p-3 bg-blue-50 rounded-lg">
-                        <p class="text-sm text-gray-600">Ingresos</p>
-                        <p id="monthly-income" class="text-xl font-bold text-blue-700">$0</p>
-                    </div>
-                    <div class="text-center p-3 bg-red-50 rounded-lg">
-                        <p class="text-sm text-gray-600">Egresos</p>
-                        <p id="monthly-expense" class="text-xl font-bold text-red-700">$0</p>
-                    </div>
-                    <div class="text-center p-3 bg-green-50 rounded-lg">
-                        <p class="text-sm text-gray-600">Neto</p>
-                        <p id="monthly-net" class="text-xl font-bold text-green-700">$0</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Nueva seccion: Flujo de Caja -->
             <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
                 <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Flujo de Caja</h3>
                 <div class="grid grid-cols-2 gap-4">
@@ -262,7 +194,6 @@
                 </div>
             </div>
 
-            <!-- Grafica de tendencia -->
             <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-800 font-poppins-bold">Tendencia de Balance</h3>
@@ -285,7 +216,6 @@
                 <canvas id="balance-trend-chart"></canvas>
             </div>
 
-            <!-- Proyeccion y tabla de asesoras -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
                     <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Proyeccion de Flujo</h3>
@@ -344,6 +274,10 @@
             <button id="export-data-button" class="py-3 px-8 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
                 Exportar Datos
             </button>
+            <input type="file" id="import-data-file" accept=".json" class="hidden">
+            <button id="import-data-button" class="py-3 px-8 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                Cargar Datos
+            </button>
             <button id="clear-data-button" class="py-3 px-8 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
                 Eliminar Todos los Datos
             </button>
@@ -352,7 +286,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // ---- Configuracion ----
             const SPREADSHEET_ID = '1D54c79yejujdFIJKVu4m3iM3ndUVnxP_fSgwSqGec5U';
             const SHEET_NAME = 'Form_Responses1';
             const SALES_COLUMN_START = 1; 
@@ -360,7 +293,6 @@
             const ADVISOR_COLUMN_INDEX = 11;
             const UPDATE_INTERVAL = 5 * 60 * 1000;
             
-            // ---- Elementos del DOM ----
             const transactionForm = document.getElementById('transaction-form');
             const manualSalesForm = document.getElementById('manual-sales-form');
             const manualSalesTotalEl = document.getElementById('manual-sales-total');
@@ -382,30 +314,26 @@
             const advisorsTable = document.getElementById('advisors-table');
             const clearDataButton = document.getElementById('clear-data-button');
             const exportDataButton = document.getElementById('export-data-button');
+            const importDataButton = document.getElementById('import-data-button');
+            const importDataFile = document.getElementById('import-data-file');
             const dateRangeSelector = document.getElementById('date-range-selector');
             const customDateRange = document.getElementById('custom-date-range');
             const startDateInput = document.getElementById('start-date');
             const endDateInput = document.getElementById('end-date');
             const applyDateRangeBtn = document.getElementById('apply-date-range');
-            const monthlyIncomeEl = document.getElementById('monthly-income');
-            const monthlyExpenseEl = document.getElementById('monthly-expense');
-            const monthlyNetEl = document.getElementById('monthly-net');
             const lastMonthIncomeEl = document.getElementById('last-month-income');
             const deleteSelectedButton = document.getElementById('delete-selected-button');
             const cashInflowEl = document.getElementById('cash-inflow');
             const cashOutflowEl = document.getElementById('cash-outflow');
             const netCashFlowEl = document.getElementById('net-cash-flow');
 
-            // ---- Instancias de los graficos ----
             let balanceChart;
             let balanceTrendChart;
             let salesByAdvisorPieChart;
 
-            // ---- Ayudantes y funciones de utilidad ----
             const DateTime = luxon.DateTime;
             const numberFormatOptions = { minimumFractionDigits: 0, maximumFractionDigits: 0 };
             
-            // Función para generar IDs únicos
             const generateUniqueId = () => {
                 return Date.now().toString(36) + Math.random().toString(36).substr(2);
             };
@@ -416,29 +344,22 @@
                     const data = localStorage.getItem(key);
                     return data ? JSON.parse(data) : defaultValue;
                 } catch (error) {
-                    console.error("Error al obtener de localStorage:", error);
                     return defaultValue;
                 }
             };
             
-            // Colores para graficas segun especificaciones
             const advisorColors = ['#00617a', '#147a80', '#080a33'];
             const incomeExpenseColors = ['#58d9b7', '#00617a'];
             
-            // ---- Gestion de datos de la aplicacion ----
             let transactions = getFromLocalStorage('novaklar_transactions', []);
             let manualSalesTotal = getFromLocalStorage('novaklar_manual_sales_total', 0);
             let dateFilter = { type: 'all', start: null, end: null };
             let selectedTransactions = new Set();
 
-            // ---- Funciones para las nuevas caracteristicas ----
-            
-            // 1. Sistema de ventas manuales simplificado
             const updateManualSalesTotal = () => {
                 manualSalesTotalEl.textContent = manualSalesTotal.toLocaleString('es-CO', numberFormatOptions);
             };
             
-            // 2. Calculo de crecimiento (diario, semanal, mensual)
             const calculateGrowth = (period) => {
                 const now = DateTime.now();
                 let currentPeriodIncome = 0;
@@ -446,7 +367,6 @@
                 
                 switch(period) {
                     case 'daily':
-                        // Crecimiento diario: comparar hoy con ayer
                         const today = now.toISODate();
                         const yesterday = now.minus({days: 1}).toISODate();
                         
@@ -460,7 +380,6 @@
                         break;
                         
                     case 'weekly':
-                        // Crecimiento semanal: comparar esta semana con la semana pasada
                         const currentWeekStart = now.startOf('week').toISODate();
                         const currentWeekEnd = now.endOf('week').toISODate();
                         
@@ -485,7 +404,6 @@
                         break;
                         
                     case 'monthly':
-                        // Crecimiento mensual: comparar este mes con el mes anterior
                         const currentMonth = now.month;
                         const currentYear = now.year;
                         
@@ -512,25 +430,22 @@
                         break;
                 }
                 
-                // Calcular crecimiento porcentual
                 let growthPercentage = 0;
                 if (previousPeriodIncome > 0) {
                     growthPercentage = ((currentPeriodIncome - previousPeriodIncome) / previousPeriodIncome) * 100;
                 } else if (currentPeriodIncome > 0) {
-                    growthPercentage = 100; // Crecimiento infinito (de 0 a positivo)
+                    growthPercentage = 100;
                 }
                 
                 growthValueEl.textContent = `${growthPercentage.toFixed(1)}%`;
                 growthValueEl.className = `text-3xl font-bold ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`;
             };
             
-            // 3. Proyeccion de flujo de caja
             const calculateCashFlowProjection = () => {
                 const now = DateTime.now();
                 const daysInMonth = now.daysInMonth;
                 const daysPassed = now.day;
                 
-                // Calcular ingresos y egresos diarios promedio
                 const dailyIncome = transactions
                     .filter(t => {
                         const date = DateTime.fromISO(t.date);
@@ -545,12 +460,10 @@
                     })
                     .reduce((sum, t) => sum + t.amount, 0) / daysPassed;
                 
-                // Calcular balance actual
                 const currentBalance = transactions.reduce((sum, t) => {
                     return t.type === 'ingreso' ? sum + t.amount : sum - t.amount;
                 }, 0);
                 
-                // Proyectar balance al final del mes
                 const daysRemaining = daysInMonth - daysPassed;
                 const projectedIncome = dailyIncome * daysRemaining;
                 const projectedExpense = dailyExpense * daysRemaining;
@@ -560,12 +473,10 @@
                 cashFlowProjectionEl.className = `text-3xl font-bold ${projectedBalance >= 0 ? 'text-green-600' : 'text-red-600'}`;
             };
             
-            // 4. Alertas inteligentes
             const checkForAlerts = () => {
                 alertsContainer.innerHTML = '';
                 const alerts = [];
                 
-                // Alerta 1: Si los egresos superan los ingresos en un periodo
                 const now = DateTime.now();
                 const currentMonthIncome = transactions
                     .filter(t => {
@@ -588,7 +499,6 @@
                     });
                 }
                 
-                // Alerta 2: Si en un dia supero mi promedio de ventas
                 const today = now.toISODate();
                 const todaySales = transactions
                     .filter(t => t.date === today && t.type === 'ingreso')
@@ -596,14 +506,13 @@
                 
                 const avgDailySales = currentMonthIncome / now.day;
                 
-                if (todaySales > avgDailySales * 1.5) { // 50% más que el promedio
+                if (todaySales > avgDailySales * 1.5) {
                     alerts.push({
                         type: 'success',
                         message: `Hoy superaste tu promedio de ventas diario. Ventas de hoy: $${todaySales.toLocaleString('es-CO')} vs. promedio: $${avgDailySales.toLocaleString('es-CO', {maximumFractionDigits: 0})}`
                     });
                 }
                 
-                // Mostrar alertas o mensaje predeterminado
                 if (alerts.length === 0) {
                     alertsContainer.innerHTML = '<p class="text-gray-500 text-sm italic">No hay alertas en este momento.</p>';
                 } else {
@@ -616,7 +525,6 @@
                 }
             };
             
-            // 5. Filtro de fechas en tendencia de balance
             const setupDateRangeFilter = () => {
                 dateRangeSelector.addEventListener('change', function() {
                     if (this.value === 'custom') {
@@ -638,7 +546,6 @@
                     }
                 });
                 
-                // Establecer valores predeterminados para los selectores de fecha
                 const today = DateTime.now().toISODate();
                 const sevenDaysAgo = DateTime.now().minus({days: 7}).toISODate();
                 startDateInput.value = sevenDaysAgo;
@@ -678,7 +585,6 @@
                 updateBalanceTrendChart();
             };
             
-            // 6. Notas automaticas mejoradas
             const updateAutomaticNote = () => {
                 if (transactions.length > 0) {
                     const lastTransaction = [...transactions].sort((a, b) => 
@@ -691,7 +597,6 @@
                     
                     automaticNoteEl.textContent = `Ultimo registro: ${formattedDate}, ${formattedTime}`;
                     
-                    // Mostrar información de la última transacción
                     const lastTransactionDate = DateTime.fromISO(lastTransaction.date).toLocaleString(DateTime.DATE_FULL);
                     const lastTransactionType = lastTransaction.type === 'ingreso' ? 'Ingreso' : 'Egreso';
                     lastTransactionNoteEl.textContent = `Ultima transacción: ${lastTransactionType} de $${lastTransaction.amount.toLocaleString('es-CO')} el ${lastTransactionDate}`;
@@ -700,36 +605,7 @@
                     lastTransactionNoteEl.textContent = '';
                 }
             };
-            
-            // 7. Nueva funcion: Resumen mensual
-            const updateMonthlySummary = () => {
-                const now = DateTime.now();
-                const currentMonth = now.month;
-                const currentYear = now.year;
-                
-                const monthlyIncome = transactions
-                    .filter(t => {
-                        const date = DateTime.fromISO(t.date);
-                        return date.month === currentMonth && date.year === currentYear && t.type === 'ingreso';
-                    })
-                    .reduce((sum, t) => sum + t.amount, 0);
-                
-                const monthlyExpense = transactions
-                    .filter(t => {
-                        const date = DateTime.fromISO(t.date);
-                        return date.month === currentMonth && date.year === currentYear && t.type === 'egreso';
-                    })
-                    .reduce((sum, t) => sum + t.amount, 0);
-                
-                const monthlyNet = monthlyIncome - monthlyExpense;
-                
-                monthlyIncomeEl.textContent = `$${monthlyIncome.toLocaleString('es-CO', numberFormatOptions)}`;
-                monthlyExpenseEl.textContent = `$${monthlyExpense.toLocaleString('es-CO', numberFormatOptions)}`;
-                monthlyNetEl.textContent = `$${monthlyNet.toLocaleString('es-CO', numberFormatOptions)}`;
-                monthlyNetEl.className = `text-xl font-bold ${monthlyNet >= 0 ? 'text-green-700' : 'text-red-700'}`;
-            };
 
-            // 8. Nueva funcion: Calcular ganancias del mes anterior
             const calculateLastMonthIncome = () => {
                 const now = DateTime.now();
                 const lastMonth = now.minus({ months: 1 });
@@ -746,7 +622,6 @@
                 lastMonthIncomeEl.textContent = `$${lastMonthIncome.toLocaleString('es-CO', numberFormatOptions)}`;
             };
 
-            // 9. Funcion para mostrar/ocultar botón de eliminar
             const toggleDeleteButton = () => {
                 if (selectedTransactions.size > 0) {
                     deleteSelectedButton.classList.remove('hidden');
@@ -755,16 +630,12 @@
                 }
             };
 
-            // 10. Nueva funcion: Eliminar transacciones específicas por ID
             const setupTransactionDeletion = () => {
-                // Manejar clic en botón de eliminar
                 deleteSelectedButton.addEventListener('click', () => {
                     if (selectedTransactions.size > 0) {
                         if (confirm(`¿Estás seguro de que quieres eliminar ${selectedTransactions.size} transacción(es)?`)) {
-                            // Filtrar transacciones para mantener solo las no seleccionadas
                             transactions = transactions.filter(t => !selectedTransactions.has(t.id));
                             
-                            // Guardar y actualizar
                             saveToLocalStorage('novaklar_transactions', transactions);
                             selectedTransactions.clear();
                             toggleDeleteButton();
@@ -774,7 +645,6 @@
                 });
             };
 
-            // 11. Nueva funcion: Exportar datos a JSON
             const setupDataExport = () => {
                 exportDataButton.addEventListener('click', () => {
                     const dataToExport = {
@@ -797,7 +667,44 @@
                 });
             };
 
-            // 12. Nueva funcion: Actualizar flujo de caja
+            const setupDataImport = () => {
+                importDataButton.addEventListener('click', () => {
+                    importDataFile.click();
+                });
+                
+                importDataFile.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            
+                            if (confirm('¿Estás seguro de que quieres cargar estos datos? Se reemplazarán los datos actuales.')) {
+                                if (importedData.transactions && Array.isArray(importedData.transactions)) {
+                                    transactions = importedData.transactions;
+                                    saveToLocalStorage('novaklar_transactions', transactions);
+                                }
+                                
+                                if (importedData.manualSalesTotal !== undefined) {
+                                    manualSalesTotal = importedData.manualSalesTotal;
+                                    saveToLocalStorage('novaklar_manual_sales_total', manualSalesTotal);
+                                }
+                                
+                                importDataFile.value = '';
+                                
+                                updateUI();
+                                alert('Datos cargados exitosamente.');
+                            }
+                        } catch (error) {
+                            alert('Error al cargar el archivo. Asegúrate de que sea un archivo JSON válido.');
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+            };
+
             const updateCashFlow = () => {
                 const now = DateTime.now();
                 const currentMonth = now.month;
@@ -825,9 +732,7 @@
                 netCashFlowEl.className = `text-2xl font-bold ${netCashFlow >= 0 ? 'text-blue-700' : 'text-red-700'}`;
             };
 
-            // ---- Logica de la UI ----
             const renderTransactions = () => {
-                // Renderizar historial completo
                 transactionHistoryBody.innerHTML = '';
                 const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
                 
@@ -835,7 +740,6 @@
                     const row = document.createElement('tr');
                     row.className = "hover:bg-gray-50 transition-colors duration-150";
                     
-                    // Crear checkbox para selección
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.className = 'transaction-checkbox';
@@ -853,7 +757,6 @@
                     checkboxCell.className = 'px-4 py-2 whitespace-nowrap';
                     checkboxCell.appendChild(checkbox);
                     
-                    // Crear celdas de datos
                     const dateCell = document.createElement('td');
                     dateCell.className = 'px-4 py-2 whitespace-nowrap text-gray-800';
                     dateCell.textContent = t.date;
@@ -866,14 +769,12 @@
                     amountCell.className = 'px-4 py-2 whitespace-nowrap';
                     amountCell.textContent = `$${t.amount.toLocaleString('es-CO', numberFormatOptions)}`;
                     
-                    // Aplicar color según el tipo de transacción
                     if (t.type === 'ingreso') {
                         amountCell.classList.add('text-green-600', 'font-semibold');
                     } else {
                         amountCell.classList.add('text-red-600', 'font-semibold');
                     }
                     
-                    // Añadir celdas a la fila
                     row.appendChild(checkboxCell);
                     row.appendChild(dateCell);
                     row.appendChild(typeCell);
@@ -891,14 +792,12 @@
             };
 
             const updateCharts = () => {
-                // Destruir instancias previas para evitar conflictos
                 if (balanceChart) balanceChart.destroy();
                 if (salesByAdvisorPieChart) salesByAdvisorPieChart.destroy();
 
                 const totalIncome = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
                 const totalExpense = transactions.filter(t => t.type === 'egreso').reduce((sum, t) => sum + t.amount, 0);
                 
-                // Grafico de Proporcion de Ingresos vs. Egresos con colores especificos
                 balanceChart = new Chart(balanceChartCanvas, {
                     type: 'doughnut',
                     data: {
@@ -938,7 +837,6 @@
             const updateBalanceTrendChart = () => {
                 if (balanceTrendChart) balanceTrendChart.destroy();
                 
-                // Filtrar transacciones segun el rango de fechas seleccionado
                 let filteredTransactions = [...transactions];
                 if (dateFilter.type !== 'all') {
                     filteredTransactions = transactions.filter(t => {
@@ -992,7 +890,6 @@
                 });
             };
 
-            // ---- Integracion con Google Sheets ----
             const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
             const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
 
@@ -1004,15 +901,11 @@
                     const cacheBuster = new Date().getTime();
                     const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&range=A:L&t=${cacheBuster}`;
                     
-                    console.log("Fetching data from:", url);
-                    
                     const response = await fetch(url);
                     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
                     
                     const text = await response.text();
-                    console.log("Raw response:", text.substring(0, 200) + "...");
                     
-                    // Extraer la parte JSON de la respuesta
                     const jsonStart = text.indexOf('{');
                     const jsonEnd = text.lastIndexOf('}') + 1;
                     if (jsonStart === -1 || jsonEnd === 0) {
@@ -1038,14 +931,13 @@
                             const advisorName = String(advisorCell.v).trim();
                             const normalizedName = normalizeName(advisorName);
                             
-                            // Filtrar y reemplazar asesoras según especificaciones
                             if (normalizedName === "danna") {
-                                return; // Eliminar a Danna
+                                return;
                             }
                             
                             let displayName = advisorName;
                             if (normalizedName === "luz") {
-                                displayName = "Alejandra"; // Reemplazar Luz por Alejandra
+                                displayName = "Alejandra";
                             }
                             
                             if (normalizedName) {
@@ -1073,13 +965,11 @@
                     });
                     
                     const advisorsData = Array.from(advisorsMap.values());
-                    console.log("Processed advisors data:", advisorsData);
                     renderAdvisors(advisorsData);
                     updateSalesStats(totalSales, datesWithSales.size);
                     updateSalesByAdvisorPieChart(advisorsData);
                     
                 } catch (error) {
-                    console.error("Error fetching or processing Sheets data:", error);
                     advisorsTableBody.innerHTML = '<tr><td colspan="2" class="px-4 py-2 text-center text-red-500">Error al cargar los datos: ' + error.message + '</td></tr>';
                 } finally {
                     advisorsLoadingState.classList.add('hidden');
@@ -1111,12 +1001,10 @@
             const updateSalesByAdvisorPieChart = (advisorsData) => {
                 if (salesByAdvisorPieChart) salesByAdvisorPieChart.destroy();
 
-                // Ordenar asesoras por ventas (de mayor a menor)
                 const sortedAdvisors = [...advisorsData].sort((a, b) => b.sales - a.sales);
                 const labels = sortedAdvisors.map(d => d.name);
                 const data = sortedAdvisors.map(d => d.sales);
                 
-                // Usar colores especificos para la grafica de asesoras
                 const backgroundColors = sortedAdvisors.map((_, index) => {
                     return advisorColors[index % advisorColors.length];
                 });
@@ -1155,7 +1043,6 @@
                 });
             };
 
-            // ---- Logica de Eliminacion de Datos ----
             clearDataButton.addEventListener('click', () => {
                 if (confirm('Estas seguro de que quieres eliminar todos los datos de transacciones y ventas manuales? Esta accion es irreversible.')) {
                     localStorage.removeItem('novaklar_transactions');
@@ -1167,7 +1054,6 @@
                 }
             });
 
-            // ---- Bucle de la aplicacion principal ----
             const updateUI = () => {
                 updateTotalBalance();
                 updateCharts();
@@ -1177,17 +1063,15 @@
                 calculateCashFlowProjection();
                 checkForAlerts();
                 updateAutomaticNote();
-                updateMonthlySummary();
                 calculateLastMonthIncome();
                 updateCashFlow();
                 fetchAndProcessSheetsData();
             };
 
-            // ---- Event Listeners ----
             transactionForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newTransaction = {
-                    id: generateUniqueId(), // Generar ID único
+                    id: generateUniqueId(),
                     date: document.getElementById('transaction-date').value,
                     type: document.getElementById('transaction-type').value,
                     amount: parseInt(document.getElementById('transaction-amount').value),
@@ -1200,7 +1084,6 @@
                 document.getElementById('transaction-date').value = DateTime.now().toISODate();
             });
 
-            // Event listener para el formulario de ventas manuales
             manualSalesForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const amount = parseInt(document.getElementById('manual-sales-amount').value);
@@ -1216,13 +1099,12 @@
                 calculateGrowth(growthPeriodSelector.value);
             });
 
-            // ---- Inicializacion ----
-            // Establecer fecha actual como predeterminada en el formulario de transacciones
             document.getElementById('transaction-date').value = DateTime.now().toISODate();
             
             setupDateRangeFilter();
             setupTransactionDeletion();
             setupDataExport();
+            setupDataImport();
             updateUI();
             setInterval(fetchAndProcessSheetsData, UPDATE_INTERVAL);
         });
