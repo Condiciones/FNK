@@ -50,6 +50,14 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .data-display {
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4 font-poppins-regular">
@@ -270,17 +278,65 @@
             </div>
         </div>
 
-        <div class="flex justify-center gap-4 py-8">
-            <button id="export-data-button" class="py-3 px-8 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
-                Exportar Datos
-            </button>
-            <input type="file" id="import-data-file" accept=".json" class="hidden">
-            <button id="import-data-button" class="py-3 px-8 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                Cargar Datos
-            </button>
-            <button id="clear-data-button" class="py-3 px-8 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
-                Eliminar Todos los Datos
-            </button>
+        <!-- Nueva sección para gestión de datos -->
+        <div class="bg-white rounded-xl p-6 shadow-lg space-y-4 border border-gray-200">
+            <h2 class="text-2xl font-semibold text-gray-800 font-poppins-bold">Gestión de Datos</h2>
+            
+            <!-- Exportación de datos -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800">Exportar Datos Locales</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button id="show-data-button" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">
+                        Mostrar Datos
+                    </button>
+                    <button id="copy-data-button" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                        Copiar al Portapapeles
+                    </button>
+                    <button id="export-data-button" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                        Descargar Archivo
+                    </button>
+                </div>
+                
+                <div id="data-display-container" class="hidden mt-4">
+                    <h4 class="text-md font-semibold mb-2 text-gray-800">Datos Locales para Exportar:</h4>
+                    <div id="data-display" class="data-display p-4 bg-gray-100 rounded-md border border-gray-300 text-sm"></div>
+                    <p class="text-xs text-gray-500 mt-2">Copia este texto y pégalo en tu nueva aplicación</p>
+                </div>
+                
+                <div id="copy-success" class="hidden p-3 bg-green-100 text-green-800 rounded-md text-sm">
+                    ¡Datos copiados al portapapeles!
+                </div>
+            </div>
+
+            <!-- Importación de datos -->
+            <div class="space-y-4 mt-6">
+                <h3 class="text-lg font-semibold text-gray-800">Importar Datos</h3>
+                <div class="flex flex-wrap gap-2">
+                    <input type="file" id="import-data-file" accept=".json" class="hidden">
+                    <button id="import-data-button" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Cargar desde Archivo
+                    </button>
+                    <button id="show-import-text-button" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200">
+                        Pegar desde Texto
+                    </button>
+                </div>
+                
+                <div id="import-text-container" class="hidden mt-4">
+                    <h4 class="text-md font-semibold mb-2 text-gray-800">Pega tus datos JSON aquí:</h4>
+                    <textarea id="import-text-area" class="w-full h-40 p-3 border border-gray-300 rounded-md focus:ring-accent focus:border-accent" placeholder="Pega aquí el texto JSON que copiaste..."></textarea>
+                    <button id="import-from-text-button" class="mt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Importar desde Texto
+                    </button>
+                </div>
+            </div>
+
+            <!-- Eliminación de datos -->
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <button id="clear-data-button" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                    Eliminar Todos los Datos Locales
+                </button>
+                <p class="text-xs text-gray-500 mt-2">Esta acción elimina todas las transacciones y ventas manuales. Los datos de Google Sheets se mantienen.</p>
+            </div>
         </div>
     </div>
 
@@ -293,6 +349,7 @@
             const ADVISOR_COLUMN_INDEX = 11;
             const UPDATE_INTERVAL = 5 * 60 * 1000;
             
+            // Elementos del DOM existentes
             const transactionForm = document.getElementById('transaction-form');
             const manualSalesForm = document.getElementById('manual-sales-form');
             const manualSalesTotalEl = document.getElementById('manual-sales-total');
@@ -313,9 +370,6 @@
             const advisorsLoadingState = document.getElementById('advisors-loading-state');
             const advisorsTable = document.getElementById('advisors-table');
             const clearDataButton = document.getElementById('clear-data-button');
-            const exportDataButton = document.getElementById('export-data-button');
-            const importDataButton = document.getElementById('import-data-button');
-            const importDataFile = document.getElementById('import-data-file');
             const dateRangeSelector = document.getElementById('date-range-selector');
             const customDateRange = document.getElementById('custom-date-range');
             const startDateInput = document.getElementById('start-date');
@@ -326,6 +380,20 @@
             const cashInflowEl = document.getElementById('cash-inflow');
             const cashOutflowEl = document.getElementById('cash-outflow');
             const netCashFlowEl = document.getElementById('net-cash-flow');
+
+            // Nuevos elementos para gestión de datos
+            const exportDataButton = document.getElementById('export-data-button');
+            const showDataButton = document.getElementById('show-data-button');
+            const copyDataButton = document.getElementById('copy-data-button');
+            const importDataButton = document.getElementById('import-data-button');
+            const importDataFile = document.getElementById('import-data-file');
+            const showImportTextButton = document.getElementById('show-import-text-button');
+            const importTextContainer = document.getElementById('import-text-container');
+            const importTextArea = document.getElementById('import-text-area');
+            const importFromTextButton = document.getElementById('import-from-text-button');
+            const dataDisplayContainer = document.getElementById('data-display-container');
+            const dataDisplay = document.getElementById('data-display');
+            const copySuccess = document.getElementById('copy-success');
 
             let balanceChart;
             let balanceTrendChart;
@@ -356,6 +424,122 @@
             let dateFilter = { type: 'all', start: null, end: null };
             let selectedTransactions = new Set();
 
+            // Función para obtener SOLO datos locales (excluye datos de Google Sheets)
+            const getLocalDataForExport = () => {
+                const localDataToExport = {
+                    transactions: transactions,
+                    manualSalesTotal: manualSalesTotal,
+                    exportDate: DateTime.now().toISO(),
+                    note: "Estos son solo los datos locales (transacciones y ventas manuales). Los datos de Google Sheets se cargan en tiempo real."
+                };
+                return JSON.stringify(localDataToExport, null, 2);
+            };
+
+            // Mostrar datos locales en pantalla
+            showDataButton.addEventListener('click', () => {
+                const dataStr = getLocalDataForExport();
+                dataDisplay.textContent = dataStr;
+                dataDisplayContainer.classList.remove('hidden');
+            });
+
+            // Copiar datos locales al portapapeles
+            copyDataButton.addEventListener('click', async () => {
+                try {
+                    const dataStr = getLocalDataForExport();
+                    await navigator.clipboard.writeText(dataStr);
+                    
+                    copySuccess.classList.remove('hidden');
+                    setTimeout(() => {
+                        copySuccess.classList.add('hidden');
+                    }, 3000);
+                } catch (err) {
+                    const dataStr = getLocalDataForExport();
+                    dataDisplay.textContent = dataStr;
+                    dataDisplayContainer.classList.remove('hidden');
+                    alert('No se pudo copiar automáticamente. Selecciona y copia el texto manualmente.');
+                }
+            });
+
+            // Descargar datos locales
+            exportDataButton.addEventListener('click', () => {
+                const dataStr = getLocalDataForExport();
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                try {
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `novaklar_datos_locales_${DateTime.now().toFormat('yyyy-MM-dd_HH-mm-ss')}.json`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    dataDisplay.textContent = dataStr;
+                    dataDisplayContainer.classList.remove('hidden');
+                    alert('No se pudo descargar el archivo. Usa la opción "Copiar al Portapapeles" o "Mostrar Datos"');
+                }
+            });
+
+            // Importar desde archivo
+            importDataButton.addEventListener('click', () => {
+                importDataFile.click();
+            });
+            
+            importDataFile.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        importData(importedData);
+                    } catch (error) {
+                        alert('Error al cargar el archivo. Asegúrate de que sea un archivo JSON válido.');
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // Mostrar/ocultar área de texto para importar
+            showImportTextButton.addEventListener('click', () => {
+                importTextContainer.classList.toggle('hidden');
+            });
+
+            // Importar desde texto
+            importFromTextButton.addEventListener('click', () => {
+                try {
+                    const importedData = JSON.parse(importTextArea.value);
+                    importData(importedData);
+                    importTextArea.value = '';
+                    importTextContainer.classList.add('hidden');
+                } catch (error) {
+                    alert('Error al procesar el texto. Asegúrate de que sea un JSON válido.');
+                }
+            });
+
+            // Función común para importar datos
+            const importData = (importedData) => {
+                if (confirm('¿Estás seguro de que quieres cargar estos datos? Se reemplazarán los datos locales actuales.')) {
+                    if (importedData.transactions && Array.isArray(importedData.transactions)) {
+                        transactions = importedData.transactions;
+                        saveToLocalStorage('novaklar_transactions', transactions);
+                    }
+                    
+                    if (importedData.manualSalesTotal !== undefined) {
+                        manualSalesTotal = importedData.manualSalesTotal;
+                        saveToLocalStorage('novaklar_manual_sales_total', manualSalesTotal);
+                    }
+                    
+                    importDataFile.value = '';
+                    
+                    updateUI();
+                    alert('Datos locales cargados exitosamente.');
+                }
+            };
+
+            // El resto de las funciones permanecen igual...
             const updateManualSalesTotal = () => {
                 manualSalesTotalEl.textContent = manualSalesTotal.toLocaleString('es-CO', numberFormatOptions);
             };
@@ -642,66 +826,6 @@
                             updateUI();
                         }
                     }
-                });
-            };
-
-            const setupDataExport = () => {
-                exportDataButton.addEventListener('click', () => {
-                    const dataToExport = {
-                        transactions: transactions,
-                        manualSalesTotal: manualSalesTotal,
-                        exportDate: DateTime.now().toISO()
-                    };
-                    
-                    const dataStr = JSON.stringify(dataToExport, null, 2);
-                    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-                    
-                    const url = URL.createObjectURL(dataBlob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `novaklar_datos_${DateTime.now().toFormat('yyyy-MM-dd_HH-mm-ss')}.json`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                });
-            };
-
-            const setupDataImport = () => {
-                importDataButton.addEventListener('click', () => {
-                    importDataFile.click();
-                });
-                
-                importDataFile.addEventListener('change', (event) => {
-                    const file = event.target.files[0];
-                    if (!file) return;
-                    
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        try {
-                            const importedData = JSON.parse(e.target.result);
-                            
-                            if (confirm('¿Estás seguro de que quieres cargar estos datos? Se reemplazarán los datos actuales.')) {
-                                if (importedData.transactions && Array.isArray(importedData.transactions)) {
-                                    transactions = importedData.transactions;
-                                    saveToLocalStorage('novaklar_transactions', transactions);
-                                }
-                                
-                                if (importedData.manualSalesTotal !== undefined) {
-                                    manualSalesTotal = importedData.manualSalesTotal;
-                                    saveToLocalStorage('novaklar_manual_sales_total', manualSalesTotal);
-                                }
-                                
-                                importDataFile.value = '';
-                                
-                                updateUI();
-                                alert('Datos cargados exitosamente.');
-                            }
-                        } catch (error) {
-                            alert('Error al cargar el archivo. Asegúrate de que sea un archivo JSON válido.');
-                        }
-                    };
-                    reader.readAsText(file);
                 });
             };
 
@@ -1103,8 +1227,6 @@
             
             setupDateRangeFilter();
             setupTransactionDeletion();
-            setupDataExport();
-            setupDataImport();
             updateUI();
             setInterval(fetchAndProcessSheetsData, UPDATE_INTERVAL);
         });
