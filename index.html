@@ -7,391 +7,663 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
-
   <style>
-    /* Color variables (reemplazadas según tu solicitud) */
-    :root{
-      --primary: #001499;           /* reemplazado de #00617a */
-      --primary-darker: #000e7a;   /* versión más oscura del primary */
-      --accent: #4270ff;           /* reemplazado de #58d9b7 */
-      --accent-rgba: 66,112,255;   /* rgb de #4270ff para fondos rgba */
+    /* Variables de color optimizadas para tablet */
+    :root {
+      --primary: #001499;
+      --primary-light: #2a3fc7;
+      --primary-dark: #000e7a;
+      --accent: #4270ff;
+      --accent-light: #6d94ff;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-800: #1f2937;
     }
 
     @font-face {
       font-family: 'DESA';
       src: url('https://raw.githubusercontent.com/novaklar/web/main/DESA.ttf') format('truetype');
     }
+
     @font-face {
       font-family: 'Poppins-Bold';
       src: url('https://raw.githubusercontent.com/novaklar/web/main/Poppins-Bold.ttf') format('truetype');
     }
+
     @font-face {
       font-family: 'Poppins-Regular';
       src: url('https://raw.githubusercontent.com/novaklar/web/main/Poppins-Regular.ttf') format('truetype');
     }
+
     .font-poppins-bold { font-family: 'Poppins-Bold', sans-serif; }
     .font-poppins-regular { font-family: 'Poppins-Regular', sans-serif; }
+    .font-desa { font-family: 'DESA', sans-serif; }
 
-    /* Utility classes that reference CSS variables to make mantenimiento más fácil */
-    .bg-primary { background-color: var(--primary); }
-    .bg-primary-darker { background-color: var(--primary-darker); }
-    .text-accent { color: var(--accent); }
-    .ring-accent { --tw-ring-color: var(--accent); }
+    /* Estilos específicos para tablet */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .tablet-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 1rem;
+      }
+      
+      .tablet-col-span-4 { grid-column: span 4; }
+      .tablet-col-span-6 { grid-column: span 6; }
+      .tablet-col-span-8 { grid-column: span 8; }
+      .tablet-col-span-12 { grid-column: span 12; }
+    }
+
+    /* Componentes rediseñados para tablet */
+    .kpi-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+    }
+
+    .kpi-value {
+      font-size: 1.875rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.7;
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+    }
+
+    .section-header {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .data-table th {
+      background-color: #f8fafc;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: var(--gray-800);
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table td {
+      padding: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .data-table tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    /* Botones optimizados para tablet */
+    .btn-primary {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 20, 153, 0.2);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      font-weight: 600;
+      padding: 0.625rem 1.25rem;
+      border-radius: 10px;
+      border: 2px solid var(--primary);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* Loading spinner mejorado */
     .loading-spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--accent);
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--accent);
       border-radius: 50%;
-      width: 24px;
-      height: 24px;
       animation: spin 1s linear infinite;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .data-display {
-      max-height: 300px;
-      overflow-y: auto;
-      font-family: monospace;
-      white-space: pre-wrap;
-      word-break: break-all;
-      font-size: 12px;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    /* Pequeñas mejoras visuales */
-    .card { border-radius: 12px; box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
-    .card-inner { padding: 1.25rem; background: white; border: 1px solid #e6e6e6; border-radius: 12px; }
-    .kpi-item { min-height: 72px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; }
-    /* responsive table small */
-    @media (max-width: 640px) {
-      .text-5xl { font-size: 2.25rem; }
+    /* Scrollbar personalizado */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Animaciones */
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilo para las alertas */
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border-left: 4px solid;
+      margin-bottom: 0.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .alert-warning {
+      background-color: #fef3c7;
+      border-left-color: #f59e0b;
+      color: #92400e;
+    }
+
+    .alert-success {
+      background-color: #d1fae5;
+      border-left-color: #10b981;
+      color: #065f46;
+    }
+
+    .alert-info {
+      background-color: #dbeafe;
+      border-left-color: var(--accent);
+      color: #1e40af;
+    }
+
+    /* Mejoras para gráficos */
+    .chart-container {
+      position: relative;
+      height: 250px;
+      width: 100%;
     }
   </style>
 </head>
-
-<body class="bg-gray-100 min-h-screen p-4 font-poppins-regular">
-  <header class="w-full max-w-6xl mx-auto flex flex-col items-center text-center py-6">
-    <img src="https://raw.githubusercontent.com/novaklar/web/refs/heads/main/novaklar1.svg" alt="novaklar Logo" class="w-24 h-24 mb-3">
-    <h1 class="text-4xl font-bold mb-1 text-gray-800" style="font-family: 'DESA', sans-serif;">novaklar</h1>
-    <p class="text-gray-600 text-sm">Finanzas empresariales — Panel optimizado</p>
+<body class="bg-gray-50 min-h-screen p-4 font-poppins-regular">
+  
+  <!-- HEADER OPTIMIZADO PARA TABLET -->
+  <header class="w-full max-w-7xl mx-auto mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="https://raw.githubusercontent.com/novaklar/web/refs/heads/main/novaklar1.svg" 
+             alt="novaklar Logo" 
+             class="w-16 h-16">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 font-desa">novaklar</h1>
+          <p class="text-gray-600 text-sm">Panel de control financiero</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-sm text-gray-600" id="current-date">Cargando fecha...</p>
+        <p class="text-xs text-gray-500" id="current-time"></p>
+      </div>
+    </div>
   </header>
 
-  <main class="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
+  <main class="w-full max-w-7xl mx-auto tablet-grid gap-4">
+    
+    <!-- SECCIÓN PRINCIPAL DE KPIs - 12 columnas -->
+    <section class="tablet-col-span-12 mb-4">
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">Indicadores Clave (KPIs)</h2>
+          <p class="text-sm opacity-90">Métricas financieras en tiempo real</p>
+        </div>
+        <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+          
+          <!-- KPI 1: Balance Total -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Balance Total</div>
+            <div id="total-balance" class="kpi-value text-gray-800">$0</div>
+            <div class="text-xs text-gray-400 mt-1">Estado general</div>
+          </div>
+          
+          <!-- KPI 2: Margen Hoy -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Margen Hoy</div>
+            <div id="kpi-margin" class="kpi-value text-green-600">0%</div>
+            <div class="text-xs text-gray-400 mt-1">Rentabilidad diaria</div>
+          </div>
+          
+          <!-- KPI 3: Ventas Totales -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Ventas Totales</div>
+            <div id="total-sales" class="kpi-value text-blue-600">0</div>
+            <div class="text-xs text-gray-400 mt-1">Acumulado VT</div>
+          </div>
+          
+          <!-- KPI 4: PDV -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Promedio Diario</div>
+            <div id="avg-sales" class="kpi-value text-purple-600">0</div>
+            <div class="text-xs text-gray-400 mt-1">PDV actual</div>
+          </div>
+          
+          <!-- KPI 5: Ingresos Hoy -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Ingresos Hoy</div>
+            <div id="kpi-income-today" class="kpi-value text-green-600">$0</div>
+            <div class="text-xs text-gray-400 mt-1">Entradas del día</div>
+          </div>
+          
+          <!-- KPI 6: Egresos Hoy -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Egresos Hoy</div>
+            <div id="kpi-expense-today" class="kpi-value text-red-600">$0</div>
+            <div class="text-xs text-gray-400 mt-1">Salidas del día</div>
+          </div>
+          
+          <!-- KPI 7: Flujo Neto -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Flujo Neto Mes</div>
+            <div id="net-cash-flow" class="kpi-value text-blue-600">$0</div>
+            <div class="text-xs text-gray-400 mt-1">Entradas - Salidas</div>
+          </div>
+          
+          <!-- KPI 8: Crecimiento -->
+          <div class="kpi-card p-4 text-center">
+            <div class="kpi-label text-gray-500">Crecimiento</div>
+            <div class="flex items-center justify-center gap-2">
+              <select id="growth-period" class="text-xs bg-transparent border-none focus:ring-0 p-0">
+                <option value="daily">Día</option>
+                <option value="weekly">Semana</option>
+                <option value="monthly">Mes</option>
+              </select>
+              <div id="growth-value" class="kpi-value text-gray-800">0%</div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">Comparativa</div>
+          </div>
+          
+        </div>
+      </div>
+    </section>
 
-    <!-- LEFT COLUMN: Forms, notas, alertas, configuración -->
-    <aside class="md:col-span-5 space-y-6">
-      <!-- Registrar Transaccion -->
-      <section class="card-inner card">
-        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Registrar Transacción</h2>
-        <form id="transaction-form" class="space-y-3">
+    <!-- COLUMNA IZQUIERDA: Transacciones y Gestión - 6 columnas -->
+    <div class="tablet-col-span-6 space-y-4">
+      
+      <!-- Registrar Transacción -->
+      <section class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">Registrar Transacción</h2>
+        </div>
+        <form id="transaction-form" class="p-4 space-y-3">
           <div>
-            <label for="transaction-date" class="block text-sm font-medium text-gray-700">Fecha</label>
-            <input type="date" id="transaction-date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 focus:ring-accent focus:border-accent">
+            <label for="transaction-date" class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+            <input type="date" id="transaction-date" required 
+                   class="w-full rounded-lg border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-accent focus:border-accent">
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="transaction-type" class="block text-sm font-medium text-gray-700">Tipo</label>
-              <select id="transaction-type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 focus:ring-accent focus:border-accent">
+              <label for="transaction-type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <select id="transaction-type" required 
+                      class="w-full rounded-lg border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-accent focus:border-accent">
                 <option value="ingreso">Ingreso</option>
                 <option value="egreso">Egreso</option>
               </select>
             </div>
             <div>
-              <label for="transaction-amount" class="block text-sm font-medium text-gray-700">Monto</label>
-              <input type="number" id="transaction-amount" placeholder="0" step="1" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 focus:ring-accent focus:border-accent">
+              <label for="transaction-amount" class="block text-sm font-medium text-gray-700 mb-1">Monto</label>
+              <input type="number" id="transaction-amount" placeholder="0" step="1" required 
+                     class="w-full rounded-lg border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-accent focus:border-accent">
             </div>
           </div>
-          <div>
-            <button type="submit" class="w-full py-2 px-4 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary-darker focus:outline-none focus:ring-2 focus:ring-offset-2 ring-accent transition-colors duration-200">
-              Guardar Transacción
-            </button>
-          </div>
+          <button type="submit" class="btn-primary w-full py-3">
+            Guardar Transacción
+          </button>
         </form>
       </section>
 
-      <!-- VTM (ventas manuales) -->
-      <section class="card-inner card">
-        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">VTM (Ventas manuales)</h2>
-        <form id="manual-sales-form" class="space-y-3">
+      <!-- VTM (Ventas manuales) -->
+      <section class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">VTM (Ventas manuales)</h2>
+        </div>
+        <div class="p-4">
+          <form id="manual-sales-form" class="space-y-3">
+            <div>
+              <label for="manual-sales-amount" class="block text-sm font-medium text-gray-700 mb-1">Número de ventas</label>
+              <input type="number" id="manual-sales-amount" placeholder="0" step="1" required 
+                     class="w-full rounded-lg border-gray-300 p-3 focus:ring-2 focus:ring-accent focus:border-accent">
+            </div>
+            <button type="submit" class="btn-primary w-full py-3">Agregar Ventas</button>
+          </form>
+          <div class="mt-4 p-4 bg-gray-50 rounded-lg text-center">
+            <p class="text-sm text-gray-600">Total VTM Acumulado</p>
+            <p id="manual-sales-total" class="text-2xl font-bold text-green-600 mt-1">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Alertas y Notas -->
+      <section class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">Alertas y Notas</h2>
+        </div>
+        <div class="p-4 space-y-4">
           <div>
-            <label for="manual-sales-amount" class="block text-sm font-medium text-gray-700">Número de ventas</label>
-            <input type="number" id="manual-sales-amount" placeholder="0" step="1" required class="mt-1 block w-full rounded-md border-gray-300 p-2 focus:ring-accent focus:border-accent">
+            <h3 class="font-semibold text-gray-700 mb-2">Alertas del Sistema</h3>
+            <div id="alerts-container">
+              <p class="text-gray-500 text-sm italic">No hay alertas en este momento.</p>
+            </div>
           </div>
-          <button type="submit" class="w-full py-2 px-4 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary-darker focus:outline-none focus:ring-2 focus:ring-offset-2 ring-accent transition-colors duration-200">Agregar Ventas</button>
-        </form>
-        <div class="mt-4 text-center">
-          <p class="text-sm text-gray-600">Total VTM</p>
-          <p id="manual-sales-total" class="text-2xl font-bold text-green-600">0</p>
-        </div>
-      </section>
-
-      <!-- Notas -->
-      <section class="card-inner card">
-        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Notas</h2>
-        <div id="notes-container" class="p-3 bg-gray-50 rounded-md min-h-[120px]">
-          <p id="automatic-note" class="text-sm text-gray-600 italic">No hay registros recientes.</p>
-          <p id="last-transaction-note" class="text-sm text-gray-600 mt-2"></p>
-        </div>
-      </section>
-
-      <!-- Alertas -->
-      <section class="card-inner card">
-        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Alertas</h2>
-        <div id="alerts-container" class="space-y-3">
-          <p class="text-gray-500 text-sm italic">No hay alertas en este momento.</p>
-        </div>
-      </section>
-
-      <!-- KPIs rápidos añadidos como nueva sección -->
-      <section class="card-inner card">
-        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">KPIs Rápidos</h2>
-        <div class="grid grid-cols-3 gap-3">
-          <div class="kpi-item bg-white rounded-lg p-3 text-center border border-gray-200">
-            <small class="text-xs text-gray-500">Ingresos Hoy</small>
-            <div id="kpi-income-today" class="text-lg font-bold text-green-600">$0</div>
-          </div>
-          <div class="kpi-item bg-white rounded-lg p-3 text-center border border-gray-200">
-            <small class="text-xs text-gray-500">Egresos Hoy</small>
-            <div id="kpi-expense-today" class="text-lg font-bold text-red-600">$0</div>
-          </div>
-          <div class="kpi-item bg-white rounded-lg p-3 text-center border border-gray-200">
-            <small class="text-xs text-gray-500">Margen</small>
-            <div id="kpi-margin" class="text-lg font-bold text-gray-800">0%</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Configuración (sección nueva para parámetros simples) -->
-      <section class="card-inner card">
-        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4 font-poppins-bold">Configuración</h2>
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700">Moneda</div>
-            <select id="config-currency" class="rounded-md border-gray-300 p-2 focus:ring-accent focus:border-accent">
-              <option value="COP">COP</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700">Formato de números</div>
-            <select id="config-number-format" class="rounded-md border-gray-300 p-2 focus:ring-accent focus:border-accent">
-              <option value="0">Sin decimales</option>
-              <option value="2">2 decimales</option>
-            </select>
-          </div>
-        </div>
-      </section>
-    </aside>
-
-    <!-- RIGHT COLUMN: Overview, charts, tables -->
-    <section class="md:col-span-7 space-y-6">
-      <!-- Top metrics grid -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-primary text-white rounded-xl p-4 card">
-          <p class="text-lg font-medium mb-1">Balance Total</p>
-          <p id="total-balance" class="text-3xl font-bold">$0</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 card border border-gray-200 text-center">
-          <p class="text-lg font-medium mb-1 text-gray-800">PDV</p>
-          <p id="avg-sales" class="text-3xl font-bold text-gray-800">0</p>
-        </div>
-
-        <div class="bg-white rounded-xl p-4 card border border-gray-200 text-center">
-          <p class="text-lg font-medium mb-1 text-gray-800">VT</p>
-          <p id="total-sales" class="text-3xl font-bold text-gray-800">0</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 card border border-gray-200 text-center">
-          <p class="text-lg font-medium mb-1 text-gray-800">Crecimiento</p>
-          <div class="flex items-center justify-center">
-            <select id="growth-period" class="mr-2 rounded-md border-gray-300 p-1 text-xs focus:ring-accent focus:border-accent">
-              <option value="daily">Día</option>
-              <option value="weekly">Semana</option>
-              <option value="monthly">Mes</option>
-            </select>
-            <p id="growth-value" class="text-3xl font-bold text-gray-800">0%</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-4 card border border-gray-200 text-center">
-          <a href="https://novaklar.github.io/web/" target="_blank" class="text-lg font-medium text-gray-800 hover:text-accent transition-colors duration-200">Afiliados</a>
-        </div>
-        <div class="bg-white rounded-xl p-4 card border border-gray-200 text-center">
-          <a href="https://novaklar.github.io/Personal/" target="_blank" class="text-lg font-medium text-gray-800 hover:text-accent transition-colors duration-200">Personal</a>
-        </div>
-      </div>
-
-      <!-- Charts -->
-      <div class="grid grid-cols-1 gap-6">
-        <div class="card-inner card">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Ingresos vs Egresos</h3>
-          <canvas id="balance-chart"></canvas>
-        </div>
-
-        <div class="card-inner card">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Ventas por Asesora</h3>
-          <canvas id="sales-by-advisor-pie-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Flujo de caja -->
-      <div class="card-inner card">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Flujo de Caja</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="text-center p-4 bg-green-50 rounded-lg">
-            <p class="text-sm text-gray-600">Entradas del Mes</p>
-            <p id="cash-inflow" class="text-xl font-bold text-green-700">$0</p>
-          </div>
-          <div class="text-center p-4 bg-red-50 rounded-lg">
-            <p class="text-sm text-gray-600">Salidas del Mes</p>
-            <p id="cash-outflow" class="text-xl font-bold text-red-700">$0</p>
-          </div>
-        </div>
-        <div class="mt-4 text-center p-4 bg-blue-50 rounded-lg">
-          <p class="text-sm text-gray-600">Flujo Neto</p>
-          <p id="net-cash-flow" class="text-2xl font-bold text-blue-700">$0</p>
-        </div>
-      </div>
-
-      <!-- Tendencia de balance -->
-      <div class="card-inner card">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-800 font-poppins-bold">Tendencia de Balance</h3>
-          <div class="flex flex-wrap gap-2 mt-2 md:mt-0">
-            <select id="date-range-selector" class="rounded-md border-gray-300 p-2 text-sm focus:ring-accent focus:border-accent">
-              <option value="all">Todo el periodo</option>
-              <option value="7">Últimos 7 días</option>
-              <option value="15">Últimos 15 días</option>
-              <option value="30">Últimos 30 días</option>
-              <option value="custom">Personalizado</option>
-            </select>
-            <div id="custom-date-range" class="hidden flex-nowrap items-center gap-2">
-              <input type="date" id="start-date" class="rounded-md border-gray-300 p-2 text-sm focus:ring-accent focus:border-accent">
-              <span>a</span>
-              <input type="date" id="end-date" class="rounded-md border-gray-300 p-2 text-sm focus:ring-accent focus:border-accent">
-              <button id="apply-date-range" class="bg-primary text-white px-3 py-2 rounded-md text-sm">Aplicar</button>
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-2">Últimas Actividades</h3>
+            <div id="notes-container" class="p-3 bg-gray-50 rounded-lg">
+              <p id="automatic-note" class="text-sm text-gray-600">No hay registros recientes.</p>
+              <p id="last-transaction-note" class="text-sm text-gray-500 mt-2"></p>
             </div>
           </div>
         </div>
-        <canvas id="balance-trend-chart"></canvas>
-      </div>
+      </section>
 
-      <!-- Tabla y proyecciones -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="card-inner card">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Proyección de Flujo</h3>
-          <div class="text-center py-4">
-            <p id="cash-flow-projection" class="text-3xl font-bold text-gray-800">$0</p>
-            <p class="text-sm text-gray-600 mt-2">Balance proyectado al final del mes</p>
+    </div>
+
+    <!-- COLUMNA DERECHA: Análisis y Gráficos - 6 columnas -->
+    <div class="tablet-col-span-6 space-y-4">
+      
+      <!-- Gráficos Principales -->
+      <section class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">Análisis Visual</h2>
+        </div>
+        <div class="p-4 space-y-6">
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-3">Ingresos vs Egresos</h3>
+            <div class="chart-container">
+              <canvas id="balance-chart"></canvas>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-3">Ventas por Asesora</h3>
+            <div class="chart-container">
+              <canvas id="sales-by-advisor-pie-chart"></canvas>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div class="card-inner card">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2 font-poppins-bold">Ventas por Asesora</h3>
-          <div id="advisors-table-container" class="overflow-x-auto">
-            <div class="flex justify-center items-center py-12" id="advisors-loading-state">
+      <!-- Flujo de Caja y Proyección -->
+      <section class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">Flujo de Caja</h2>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="text-center p-4 bg-green-50 rounded-xl">
+              <p class="text-sm text-gray-600 mb-1">Entradas</p>
+              <p id="cash-inflow" class="text-xl font-bold text-green-700">$0</p>
+            </div>
+            <div class="text-center p-4 bg-red-50 rounded-xl">
+              <p class="text-sm text-gray-600 mb-1">Salidas</p>
+              <p id="cash-outflow" class="text-xl font-bold text-red-700">$0</p>
+            </div>
+            <div class="text-center p-4 bg-blue-50 rounded-xl">
+              <p class="text-sm text-gray-600 mb-1">Proyección</p>
+              <p id="cash-flow-projection" class="text-xl font-bold text-blue-700">$0</p>
+            </div>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-semibold text-gray-700 mb-3">Tendencia de Balance</h3>
+            <div class="chart-container">
+              <canvas id="balance-trend-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ventas por Asesora (Tabla) -->
+      <section class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">Desempeño por Asesora</h2>
+        </div>
+        <div class="p-4">
+          <div id="advisors-table-container" class="overflow-hidden rounded-lg">
+            <div class="flex justify-center items-center py-8" id="advisors-loading-state">
               <div class="loading-spinner"></div>
             </div>
-            <table class="min-w-full divide-y divide-gray-300 hidden" id="advisors-table">
-              <thead class="bg-primary-darker">
-                <tr class="text-white">
-                  <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Asesora</th>
-                  <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Ventas</th>
+            <div id="advisors-table-content" class="hidden">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="text-left">Asesora</th>
+                    <th class="text-right">Ventas</th>
+                    <th class="text-right">Participación</th>
+                  </tr>
+                </thead>
+                <tbody id="advisors-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- SECCIÓN INFERIOR: Historial y Gestión - 12 columnas -->
+    <div class="tablet-col-span-12 mt-4 space-y-4">
+      
+      <!-- Historial de Transacciones -->
+      <section class="section-card">
+        <div class="section-header flex justify-between items-center">
+          <h2 class="text-xl font-bold">Historial de Transacciones</h2>
+          <button id="delete-selected-button" 
+                  class="btn-secondary bg-red-50 border-red-200 text-red-700 hidden">
+            Eliminar Seleccionadas
+          </button>
+        </div>
+        <div class="p-4">
+          <div class="overflow-x-auto rounded-lg border">
+            <table class="data-table min-w-full">
+              <thead>
+                <tr>
+                  <th class="w-12">
+                    <input type="checkbox" id="select-all-checkbox" class="rounded border-gray-300">
+                  </th>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th class="text-right">Monto</th>
+                  <th>Descripción</th>
                 </tr>
               </thead>
-              <tbody id="advisors-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+              <tbody id="transaction-history-body"></tbody>
             </table>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- Gestión de Datos -->
+      <section class="section-card">
+        <div class="section-header">
+          <h2 class="text-xl font-bold">Gestión de Datos</h2>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-3">
+              <h3 class="font-semibold text-gray-700">Exportar Datos</h3>
+              <button id="export-data-button" class="btn-primary w-full">
+                Descargar Archivo
+              </button>
+              <button id="copy-data-button" class="btn-secondary w-full">
+                Copiar al Portapapeles
+              </button>
+            </div>
+            
+            <div class="space-y-3">
+              <h3 class="font-semibold text-gray-700">Importar Datos</h3>
+              <input type="file" id="import-data-file" accept=".json" class="hidden">
+              <button id="import-data-button" class="btn-primary w-full">
+                Cargar desde Archivo
+              </button>
+              <button id="show-import-text-button" class="btn-secondary w-full">
+                Pegar desde Texto
+              </button>
+            </div>
+            
+            <div class="space-y-3">
+              <h3 class="font-semibold text-gray-700">Configuración</h3>
+              <select id="config-currency" 
+                      class="w-full rounded-lg border-gray-300 p-2 focus:ring-2 focus:ring-accent">
+                <option value="COP">COP - Peso Colombiano</option>
+                <option value="USD">USD - Dólar Americano</option>
+                <option value="EUR">EUR - Euro</option>
+              </select>
+              <button id="clear-data-button" 
+                      class="w-full py-2 px-4 rounded-lg border border-red-300 text-red-600 hover:bg-red-50">
+                Limpiar Datos Locales
+              </button>
+            </div>
+          </div>
+          
+          <!-- Área para importar texto -->
+          <div id="import-text-container" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+            <h4 class="font-semibold text-gray-700 mb-2">Pegar datos JSON</h4>
+            <textarea id="import-text-area" 
+                     class="w-full h-32 p-3 rounded-lg border-gray-300 focus:ring-2 focus:ring-accent"
+                     placeholder="Pega aquí el texto JSON que copiaste..."></textarea>
+            <div class="flex gap-2 mt-2">
+              <button id="import-from-text-button" class="btn-primary">
+                Importar desde Texto
+              </button>
+              <button id="cancel-import-button" class="btn-secondary">
+                Cancelar
+              </button>
+            </div>
+          </div>
+          
+          <!-- Visualización de datos -->
+          <div id="data-display-container" class="hidden mt-4">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-semibold text-gray-700">Datos Locales</h4>
+              <button id="close-data-display" class="text-gray-500 hover:text-gray-700">
+                ✕
+              </button>
+            </div>
+            <div id="data-display" class="p-3 bg-gray-100 rounded-lg border border-gray-300 text-sm font-mono overflow-auto max-h-48"></div>
+          </div>
+          
+          <!-- Confirmación de copia -->
+          <div id="copy-success" 
+               class="hidden mt-2 p-3 bg-green-100 text-green-800 rounded-lg text-sm text-center">
+            ✓ Datos copiados al portapapeles
+          </div>
+        </div>
+      </section>
+      
+    </div>
+
   </main>
 
-  <!-- HISTORIAL Y GESTIÓN DE DATOS -->
-  <div class="w-full max-w-6xl mx-auto space-y-8 mt-8">
-    <div class="card-inner card">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-semibold text-gray-800 font-poppins-bold">Historial de Transacciones</h2>
-        <button id="delete-selected-button" class="py-2 px-4 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 hidden">Eliminar Seleccionadas</button>
+  <!-- FOOTER -->
+  <footer class="w-full max-w-7xl mx-auto mt-8 pt-6 border-t border-gray-200">
+    <div class="flex flex-col md:flex-row justify-between items-center">
+      <div class="text-sm text-gray-600">
+        <p>novaklar - Sistema de Finanzas Empresariales</p>
+        <p class="text-xs mt-1">Optimizado para tablet • Actualizado en tiempo real</p>
       </div>
-
-      <div class="overflow-x-auto mt-4">
-        <table class="min-w-full divide-y divide-gray-300">
-          <thead class="bg-primary-darker">
-            <tr class="text-white">
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Seleccionar</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Fecha</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Tipo</th>
-              <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Monto</th>
-            </tr>
-          </thead>
-          <tbody id="transaction-history-body" class="bg-white divide-y divide-gray-200"></tbody>
-        </table>
+      <div class="flex gap-4 mt-4 md:mt-0">
+        <a href="https://novaklar.github.io/web/" target="_blank" 
+           class="text-sm text-gray-600 hover:text-primary transition-colors">
+          Afiliados
+        </a>
+        <a href="https://novaklar.github.io/Personal/" target="_blank" 
+           class="text-sm text-gray-600 hover:text-primary transition-colors">
+          Personal
+        </a>
       </div>
     </div>
-
-    <!-- Gestión de datos: export/import/limpieza (optimizadas y centralizadas) -->
-    <div class="card-inner card">
-      <h2 class="text-2xl font-semibold text-gray-800 font-poppins-bold">Gestión de Datos</h2>
-
-      <div class="space-y-4 mt-4">
-        <h3 class="text-lg font-semibold text-gray-800">Exportar Datos Locales</h3>
-        <div class="flex flex-wrap gap-2">
-          <button id="show-data-button" class="py-2 px-4 rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">Mostrar Datos</button>
-          <button id="copy-data-button" class="py-2 px-4 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">Copiar al Portapapeles</button>
-          <button id="export-data-button" class="py-2 px-4 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">Descargar Archivo</button>
-        </div>
-
-        <div id="data-display-container" class="hidden mt-4">
-          <h4 class="text-md font-semibold mb-2 text-gray-800">Datos Locales para Exportar:</h4>
-          <div id="data-display" class="data-display p-4 bg-gray-100 rounded-md border border-gray-300 text-sm"></div>
-          <p class="text-xs text-gray-500 mt-2">Copia este texto y pégalo en tu nueva aplicación</p>
-        </div>
-
-        <div id="copy-success" class="hidden p-3 bg-green-100 text-green-800 rounded-md text-sm">
-          ¡Datos copiados al portapapeles!
-        </div>
-      </div>
-
-      <div class="space-y-4 mt-6">
-        <h3 class="text-lg font-semibold text-gray-800">Importar Datos</h3>
-        <div class="flex flex-wrap gap-2">
-          <input type="file" id="import-data-file" accept=".json" class="hidden">
-          <button id="import-data-button" class="py-2 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">Cargar desde Archivo</button>
-          <button id="show-import-text-button" class="py-2 px-4 rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200">Pegar desde Texto</button>
-        </div>
-
-        <div id="import-text-container" class="hidden mt-4">
-          <h4 class="text-md font-semibold mb-2 text-gray-800">Pega tus datos JSON aquí:</h4>
-          <textarea id="import-text-area" class="w-full h-40 p-3 border border-gray-300 rounded-md focus:ring-accent focus:border-accent" placeholder="Pega aquí el texto JSON que copiaste..."></textarea>
-          <button id="import-from-text-button" class="mt-2 py-2 px-4 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">Importar desde Texto</button>
-        </div>
-      </div>
-
-      <div class="mt-6 pt-4 border-t border-gray-200">
-        <button id="clear-data-button" class="py-2 px-4 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">Eliminar Todos los Datos Locales</button>
-        <p class="text-xs text-gray-500 mt-2">Esta acción elimina todas las transacciones y ventas manuales. Los datos de Google Sheets se mantienen.</p>
-      </div>
-    </div>
-  </div>
+  </footer>
 
   <script>
-    // Usar scoping limitado y cacheo de selectores para optimización
+    // Script corregido e integrado: incluye prevención de ReferenceError (DateTime) y parsing robusto de gviz
     document.addEventListener('DOMContentLoaded', () => {
+      // Inicializar DateTime lo antes posible
       const DateTime = luxon.DateTime;
-      const numberFormatOptions = { minimumFractionDigits: 0, maximumFractionDigits: 0 };
 
-      // Config/constantes
+      // Actualizo la fecha y hora en el header
+      const updateDateTime = () => {
+        const now = DateTime.now();
+        const dateEl = document.getElementById('current-date');
+        const timeEl = document.getElementById('current-time');
+        if (dateEl) dateEl.textContent = now.toLocaleString(DateTime.DATE_HUGE);
+        if (timeEl) timeEl.textContent = now.toLocaleString(DateTime.TIME_SIMPLE);
+      };
+      
+      updateDateTime();
+      setInterval(updateDateTime, 60000);
+      
+      const numberFormatOptions = { minimumFractionDigits: 0, maximumFractionDigits: 0 };
+      
       const SPREADSHEET_ID = '1D54c79yejujdFIJKVu4m3iM3ndUVnxP_fSgwSqGec5U';
       const SHEET_NAME = 'Form_Responses1';
       const SALES_COLUMN_START = 1;
       const SALES_COLUMN_END = 10;
       const ADVISOR_COLUMN_INDEX = 11;
       const UPDATE_INTERVAL = 5 * 60 * 1000;
-
-      // Colores actualizados: reemplazados globalmente en CSS y aquí para gráficos
+      
       const advisorColors = ['#001499', '#1470d1', '#080a33'];
-      const incomeExpenseColors = ['#4270ff', '#001499']; // [ingresos, egresos]
-
-      // Cacheamos referencias de DOM
+      const incomeExpenseColors = ['#4270ff', '#001499'];
+      
+      // Cacheamos referencias de DOM (defensivas)
       const $ = id => document.getElementById(id);
       const transactionForm = $('transaction-form');
       const manualSalesForm = $('manual-sales-form');
@@ -407,26 +679,22 @@
       const alertsContainer = $('alerts-container');
       const transactionHistoryBody = $('transaction-history-body');
       const advisorsTableBody = $('advisors-table-body');
-      const balanceChartCanvas = $('balance-chart').getContext('2d');
-      const balanceTrendChartCanvas = $('balance-trend-chart').getContext('2d');
-      const salesByAdvisorPieChartCanvas = $('sales-by-advisor-pie-chart').getContext('2d');
+      const balanceChartCanvasEl = $('balance-chart');
+      const balanceChartCanvas = balanceChartCanvasEl ? balanceChartCanvasEl.getContext('2d') : null;
+      const balanceTrendChartCanvasEl = $('balance-trend-chart');
+      const balanceTrendChartCanvas = balanceTrendChartCanvasEl ? balanceTrendChartCanvasEl.getContext('2d') : null;
+      const salesByAdvisorPieChartCanvasEl = $('sales-by-advisor-pie-chart');
+      const salesByAdvisorPieChartCanvas = salesByAdvisorPieChartCanvasEl ? salesByAdvisorPieChartCanvasEl.getContext('2d') : null;
       const advisorsLoadingState = $('advisors-loading-state');
-      const advisorsTable = $('advisors-table');
+      const advisorsTableContent = $('advisors-table-content');
       const clearDataButton = $('clear-data-button');
-      const dateRangeSelector = $('date-range-selector');
-      const customDateRange = $('custom-date-range');
-      const startDateInput = $('start-date');
-      const endDateInput = $('end-date');
-      const applyDateRangeBtn = $('apply-date-range');
-      const lastMonthIncomeEl = $('last-month-income');
       const deleteSelectedButton = $('delete-selected-button');
       const cashInflowEl = $('cash-inflow');
       const cashOutflowEl = $('cash-outflow');
       const netCashFlowEl = $('net-cash-flow');
-
+      
       // Gestión de datos UI
       const exportDataButton = $('export-data-button');
-      const showDataButton = $('show-data-button');
       const copyDataButton = $('copy-data-button');
       const importDataButton = $('import-data-button');
       const importDataFile = $('import-data-file');
@@ -434,58 +702,76 @@
       const importTextContainer = $('import-text-container');
       const importTextArea = $('import-text-area');
       const importFromTextButton = $('import-from-text-button');
+      const cancelImportButton = $('cancel-import-button');
       const dataDisplayContainer = $('data-display-container');
       const dataDisplay = $('data-display');
+      const closeDataDisplay = $('close-data-display');
       const copySuccess = $('copy-success');
-
+      
       // Nuevos KPI elements
       const kpiIncomeTodayEl = $('kpi-income-today');
       const kpiExpenseTodayEl = $('kpi-expense-today');
       const kpiMarginEl = $('kpi-margin');
-
+      
       // Estado
       let balanceChart, balanceTrendChart, salesByAdvisorPieChart;
       let transactions = getFromLocalStorage('novaklar_transactions', []);
       let manualSalesTotal = getFromLocalStorage('novaklar_manual_sales_total', 0);
       let dateFilter = { type: 'all', start: null, end: null };
       let selectedTransactions = new Set();
-
+      
       // Helpers de almacenamiento
-      function saveToLocalStorage(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
-      function getFromLocalStorage(key, defaultValue = []) {
-        try { const data = localStorage.getItem(key); return data ? JSON.parse(data) : defaultValue; } catch (e) { return defaultValue; }
+      function saveToLocalStorage(key, data) {
+        try {
+          localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+          console.warn('No se pudo guardar en localStorage', e);
+        }
       }
-
+      
+      function getFromLocalStorage(key, defaultValue = []) {
+        try {
+          const data = localStorage.getItem(key);
+          return data ? JSON.parse(data) : defaultValue;
+        } catch (e) {
+          return defaultValue;
+        }
+      }
+      
       // ID único
       const generateUniqueId = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
-
-      // Exportar solo datos locales (transacciones y ventas manuales)
+      
+      // Exportar solo datos locales
       const getLocalDataForExport = () => JSON.stringify({
         transactions,
         manualSalesTotal,
         exportDate: DateTime.now().toISO(),
         note: "Estos son solo los datos locales (transacciones y ventas manuales). Los datos de Google Sheets se cargan en tiempo real."
       }, null, 2);
-
+      
       // UI Data management
-      showDataButton.addEventListener('click', () => {
+      $('show-data-button')?.addEventListener('click', () => {
         dataDisplay.textContent = getLocalDataForExport();
         dataDisplayContainer.classList.remove('hidden');
       });
-
-      copyDataButton.addEventListener('click', async () => {
+      
+      copyDataButton?.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(getLocalDataForExport());
-          copySuccess.classList.remove('hidden');
-          setTimeout(() => copySuccess.classList.add('hidden'), 2500);
+          if (copySuccess) {
+            copySuccess.classList.remove('hidden');
+            setTimeout(() => copySuccess.classList.add('hidden'), 2500);
+          }
         } catch (err) {
-          dataDisplay.textContent = getLocalDataForExport();
-          dataDisplayContainer.classList.remove('hidden');
+          if (dataDisplay) {
+            dataDisplay.textContent = getLocalDataForExport();
+            dataDisplayContainer.classList.remove('hidden');
+          }
           alert('No se pudo copiar automáticamente. Selecciona y copia el texto manualmente.');
         }
       });
-
-      exportDataButton.addEventListener('click', () => {
+      
+      exportDataButton?.addEventListener('click', () => {
         const dataStr = getLocalDataForExport();
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -497,19 +783,35 @@
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       });
-
-      importDataButton.addEventListener('click', () => importDataFile.click());
-      importDataFile.addEventListener('change', (e) => {
-        const file = e.target.files[0]; if (!file) return;
+      
+      importDataButton?.addEventListener('click', () => importDataFile?.click());
+      
+      importDataFile?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
         reader.onload = (ev) => {
-          try { const imported = JSON.parse(ev.target.result); importData(imported); } catch { alert('Archivo JSON inválido'); }
+          try {
+            const imported = JSON.parse(ev.target.result);
+            importData(imported);
+          } catch {
+            alert('Archivo JSON inválido');
+          }
         };
         reader.readAsText(file);
       });
-
-      showImportTextButton.addEventListener('click', () => importTextContainer.classList.toggle('hidden'));
-      importFromTextButton.addEventListener('click', () => {
+      
+      showImportTextButton?.addEventListener('click', () => {
+        importTextContainer?.classList.toggle('hidden');
+        importTextArea?.focus();
+      });
+      
+      cancelImportButton?.addEventListener('click', () => {
+        importTextContainer?.classList.add('hidden');
+        if (importTextArea) importTextArea.value = '';
+      });
+      
+      importFromTextButton?.addEventListener('click', () => {
         try {
           const imported = JSON.parse(importTextArea.value);
           importData(imported);
@@ -519,31 +821,38 @@
           alert('JSON inválido en el texto pegado.');
         }
       });
-
+      
+      closeDataDisplay?.addEventListener('click', () => {
+        dataDisplayContainer.classList.add('hidden');
+      });
+      
       function importData(importedData) {
         if (!confirm('¿Estás seguro de que quieres cargar estos datos? Se reemplazarán los datos locales actuales.')) return;
+        
         if (importedData.transactions && Array.isArray(importedData.transactions)) {
           transactions = importedData.transactions;
           saveToLocalStorage('novaklar_transactions', transactions);
         }
+        
         if (importedData.manualSalesTotal !== undefined) {
           manualSalesTotal = importedData.manualSalesTotal;
           saveToLocalStorage('novaklar_manual_sales_total', manualSalesTotal);
         }
-        importDataFile.value = '';
+        
+        if (importDataFile) importDataFile.value = '';
         updateUI();
         alert('Datos locales cargados exitosamente.');
       }
-
+      
       // Render y cálculos
       const updateManualSalesTotal = () => {
-        manualSalesTotalEl.textContent = manualSalesTotal.toLocaleString('es-CO', numberFormatOptions);
+        if (manualSalesTotalEl) manualSalesTotalEl.textContent = manualSalesTotal.toLocaleString('es-CO', numberFormatOptions);
       };
-
+      
       const calculateGrowth = (period) => {
         const now = DateTime.now();
         let currentPeriodIncome = 0, previousPeriodIncome = 0;
-
+        
         if (period === 'daily') {
           const today = now.toISODate();
           const yesterday = now.minus({ days: 1 }).toISODate();
@@ -569,131 +878,133 @@
             return d.month === lm && d.year === ly && t.type === 'ingreso';
           });
         }
-
+        
         let growthPercentage = 0;
-        if (previousPeriodIncome > 0) growthPercentage = ((currentPeriodIncome - previousPeriodIncome) / previousPeriodIncome) * 100;
-        else if (currentPeriodIncome > 0) growthPercentage = 100;
-        growthValueEl.textContent = `${growthPercentage.toFixed(1)}%`;
-        growthValueEl.className = `text-3xl font-bold ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        if (previousPeriodIncome > 0) {
+          growthPercentage = ((currentPeriodIncome - previousPeriodIncome) / previousPeriodIncome) * 100;
+        } else if (currentPeriodIncome > 0) {
+          growthPercentage = 100;
+        }
+        
+        if (growthValueEl) {
+          growthValueEl.textContent = `${growthPercentage.toFixed(1)}%`;
+          growthValueEl.className = `kpi-value ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        }
       };
-
+      
       function sumTransactions(predicate) {
         return transactions.filter(predicate).reduce((s, t) => s + (t.amount || 0), 0);
       }
-
+      
       const calculateCashFlowProjection = () => {
         const now = DateTime.now();
         const daysInMonth = now.daysInMonth;
         const daysPassed = now.day || 1;
-
+        
         const dailyIncome = sumTransactions(t => {
           const d = DateTime.fromISO(t.date);
           return d.month === now.month && d.year === now.year && t.type === 'ingreso';
-        }) / daysPassed;
-
+        }) / Math.max(1, daysPassed);
+        
         const dailyExpense = sumTransactions(t => {
           const d = DateTime.fromISO(t.date);
           return d.month === now.month && d.year === now.year && t.type === 'egreso';
-        }) / daysPassed;
-
-        const currentBalance = transactions.reduce((sum, t) => t.type === 'ingreso' ? sum + t.amount : sum - t.amount, 0);
+        }) / Math.max(1, daysPassed);
+        
+        const currentBalance = transactions.reduce((sum, t) => t.type === 'ingreso' ? sum + (t.amount || 0) : sum - (t.amount || 0), 0);
         const daysRemaining = daysInMonth - daysPassed;
         const projectedBalance = Math.round(currentBalance + dailyIncome * daysRemaining - dailyExpense * daysRemaining);
-
-        cashFlowProjectionEl.textContent = `$${projectedBalance.toLocaleString('es-CO', numberFormatOptions)}`;
-        cashFlowProjectionEl.className = `text-3xl font-bold ${projectedBalance >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        
+        if (cashFlowProjectionEl) {
+          cashFlowProjectionEl.textContent = `$${projectedBalance.toLocaleString('es-CO', numberFormatOptions)}`;
+          cashFlowProjectionEl.className = `text-xl font-bold ${projectedBalance >= 0 ? 'text-blue-700' : 'text-red-700'}`;
+        }
       };
-
+      
       const checkForAlerts = () => {
+        if (!alertsContainer) return;
         alertsContainer.innerHTML = '';
         const now = DateTime.now();
+        
         const currentMonthIncome = sumTransactions(t => {
-          const d = DateTime.fromISO(t.date); return d.month === now.month && d.year === now.year && t.type === 'ingreso';
+          const d = DateTime.fromISO(t.date);
+          return d.month === now.month && d.year === now.year && t.type === 'ingreso';
         });
+        
         const currentMonthExpense = sumTransactions(t => {
-          const d = DateTime.fromISO(t.date); return d.month === now.month && d.year === now.year && t.type === 'egreso';
+          const d = DateTime.fromISO(t.date);
+          return d.month === now.month && d.year === now.year && t.type === 'egreso';
         });
-
+        
         const alerts = [];
+        
         if (currentMonthExpense > currentMonthIncome) {
-          alerts.push({ type: 'warning', message: `Los egresos ($${currentMonthExpense.toLocaleString('es-CO')}) superan los ingresos ($${currentMonthIncome.toLocaleString('es-CO')}) este mes.` });
+          alerts.push({
+            type: 'warning',
+            message: `Los egresos ($${currentMonthExpense.toLocaleString('es-CO')}) superan los ingresos ($${currentMonthIncome.toLocaleString('es-CO')}) este mes.`
+          });
         }
-
+        
         const today = now.toISODate();
         const todaySales = sumTransactions(t => t.date === today && t.type === 'ingreso');
         const avgDailySales = currentMonthIncome / Math.max(1, now.day);
-
+        
         if (todaySales > avgDailySales * 1.5) {
-          alerts.push({ type: 'success', message: `Hoy superaste tu promedio de ventas diario. Ventas de hoy: $${todaySales.toLocaleString('es-CO')} vs. promedio: $${Math.round(avgDailySales).toLocaleString('es-CO')}` });
+          alerts.push({
+            type: 'success',
+            message: `Hoy superaste tu promedio de ventas diario. Ventas de hoy: $${todaySales.toLocaleString('es-CO')} vs. promedio: $${Math.round(avgDailySales).toLocaleString('es-CO')}`
+          });
         }
-
+        
+        if (todaySales === 0) {
+          alerts.push({
+            type: 'info',
+            message: 'No hay transacciones registradas para hoy.'
+          });
+        }
+        
         if (!alerts.length) {
           alertsContainer.innerHTML = '<p class="text-gray-500 text-sm italic">No hay alertas en este momento.</p>';
         } else {
           alerts.forEach(a => {
             const node = document.createElement('div');
-            node.className = `p-3 rounded-md text-sm ${a.type === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`;
+            node.className = `alert alert-${a.type}`;
             node.textContent = a.message;
             alertsContainer.appendChild(node);
           });
         }
       };
-
-      const setupDateRangeFilter = () => {
-        dateRangeSelector.addEventListener('change', function () {
-          if (this.value === 'custom') customDateRange.classList.remove('hidden');
-          else { customDateRange.classList.add('hidden'); applyDateFilter(this.value); }
-        });
-        applyDateRangeBtn.addEventListener('click', () => {
-          if (!startDateInput.value || !endDateInput.value) return alert('Selecciona rango válido');
-          dateFilter = { type: 'custom', start: startDateInput.value, end: endDateInput.value };
-          updateBalanceTrendChart();
-        });
-        const today = DateTime.now().toISODate();
-        startDateInput.value = DateTime.now().minus({ days: 7 }).toISODate();
-        endDateInput.value = today;
-      };
-
-      const applyDateFilter = (rangeValue) => {
-        const now = DateTime.now();
-        switch (rangeValue) {
-          case 'all': dateFilter = { type: 'all', start: null, end: null }; break;
-          case '7': dateFilter = { type: 'period', start: now.minus({ days: 7 }).toISODate(), end: now.toISODate() }; break;
-          case '15': dateFilter = { type: 'period', start: now.minus({ days: 15 }).toISODate(), end: now.toISODate() }; break;
-          case '30': dateFilter = { type: 'period', start: now.minus({ days: 30 }).toISODate(), end: now.toISODate() }; break;
-        }
-        updateBalanceTrendChart();
-      };
-
+      
       const updateAutomaticNote = () => {
+        if (!automaticNoteEl || !lastTransactionNoteEl) return;
         if (!transactions.length) {
           automaticNoteEl.textContent = 'No hay registros recientes.';
           lastTransactionNoteEl.textContent = '';
           return;
         }
-        const lastTransaction = [...transactions].sort((a, b) => new Date(b.date + 'T' + (b.time || '00:00')) - new Date(a.date + 'T' + (a.time || '00:00')))[0];
+        
+        const lastTransaction = [...transactions].sort((a, b) => 
+          new Date(b.date + 'T' + (b.time || '00:00')) - new Date(a.date + 'T' + (a.time || '00:00'))
+        )[0];
+        
         const now = DateTime.now();
-        automaticNoteEl.textContent = `Último registro: ${now.toLocaleString(DateTime.DATE_FULL)}, ${now.toLocaleString(DateTime.TIME_SIMPLE)}`;
+        automaticNoteEl.textContent = `Sistema actualizado: ${now.toLocaleString(DateTime.TIME_SIMPLE)}`;
+        
         const lastDate = DateTime.fromISO(lastTransaction.date).toLocaleString(DateTime.DATE_FULL);
         lastTransactionNoteEl.textContent = `Última transacción: ${lastTransaction.type === 'ingreso' ? 'Ingreso' : 'Egreso'} de $${(lastTransaction.amount || 0).toLocaleString('es-CO')} el ${lastDate}`;
       };
-
-      const calculateLastMonthIncome = () => {
-        const now = DateTime.now();
-        const lastMonth = now.minus({ months: 1 });
-        const income = sumTransactions(t => {
-          const d = DateTime.fromISO(t.date); return d.month === lastMonth.month && d.year === lastMonth.year && t.type === 'ingreso';
-        });
-        // lastMonthIncomeEl might not exist in DOM in this layout but keep safe
-        if (lastMonthIncomeEl) lastMonthIncomeEl.textContent = `$${income.toLocaleString('es-CO', numberFormatOptions)}`;
+      
+      const toggleDeleteButton = () => {
+        if (!deleteSelectedButton) return;
+        deleteSelectedButton.classList.toggle('hidden', selectedTransactions.size === 0);
       };
-
-      const toggleDeleteButton = () => deleteSelectedButton.classList.toggle('hidden', selectedTransactions.size === 0);
-
+      
       const setupTransactionDeletion = () => {
+        if (!deleteSelectedButton) return;
         deleteSelectedButton.addEventListener('click', () => {
           if (!selectedTransactions.size) return;
           if (!confirm(`¿Eliminar ${selectedTransactions.size} transacción(es)?`)) return;
+          
           transactions = transactions.filter(t => !selectedTransactions.has(t.id));
           saveToLocalStorage('novaklar_transactions', transactions);
           selectedTransactions.clear();
@@ -701,227 +1012,150 @@
           updateUI();
         });
       };
-
+      
       const updateCashFlow = () => {
+        if (!cashInflowEl || !cashOutflowEl || !netCashFlowEl) return;
         const now = DateTime.now();
+        
         const cashInflow = sumTransactions(t => {
-          const d = DateTime.fromISO(t.date); return d.month === now.month && d.year === now.year && t.type === 'ingreso';
+          const d = DateTime.fromISO(t.date);
+          return d.month === now.month && d.year === now.year && t.type === 'ingreso';
         });
+        
         const cashOutflow = sumTransactions(t => {
-          const d = DateTime.fromISO(t.date); return d.month === now.month && d.year === now.year && t.type === 'egreso';
+          const d = DateTime.fromISO(t.date);
+          return d.month === now.month && d.year === now.year && t.type === 'egreso';
         });
+        
         const net = cashInflow - cashOutflow;
+        
         cashInflowEl.textContent = `$${cashInflow.toLocaleString('es-CO', numberFormatOptions)}`;
         cashOutflowEl.textContent = `$${cashOutflow.toLocaleString('es-CO', numberFormatOptions)}`;
         netCashFlowEl.textContent = `$${net.toLocaleString('es-CO', numberFormatOptions)}`;
-        netCashFlowEl.className = `text-2xl font-bold ${net >= 0 ? 'text-blue-700' : 'text-red-700'}`;
+        netCashFlowEl.className = `kpi-value ${net >= 0 ? 'text-blue-600' : 'text-red-600'}`;
       };
-
+      
+      // Añadir listener de select-all una sola vez (si existe)
+      const selectAllCheckbox = document.getElementById('select-all-checkbox');
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', (e) => {
+          const checkboxes = document.querySelectorAll('.transaction-checkbox');
+          checkboxes.forEach(cb => {
+            cb.checked = e.target.checked;
+            if (e.target.checked) selectedTransactions.add(cb.dataset.id);
+            else selectedTransactions.delete(cb.dataset.id);
+          });
+          toggleDeleteButton();
+        });
+      }
+      
       const renderTransactions = () => {
+        if (!transactionHistoryBody) return;
         transactionHistoryBody.innerHTML = '';
-        const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date) || (b.time || '').localeCompare(a.time || ''));
+        
+        const sorted = [...transactions].sort((a, b) => 
+          new Date(b.date) - new Date(a.date) || (b.time || '').localeCompare(a.time || '')
+        );
+        
         sorted.forEach(t => {
-          const row = document.createElement('tr'); row.className = "hover:bg-gray-50 transition-colors duration-150";
+          const row = document.createElement('tr');
+          
           const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox'; checkbox.className = 'transaction-checkbox'; checkbox.dataset.id = t.id;
+          checkbox.type = 'checkbox';
+          checkbox.className = 'transaction-checkbox rounded border-gray-300';
+          checkbox.dataset.id = t.id;
           checkbox.addEventListener('change', (e) => {
-            if (e.target.checked) selectedTransactions.add(t.id); else selectedTransactions.delete(t.id);
+            if (e.target.checked) selectedTransactions.add(t.id);
+            else selectedTransactions.delete(t.id);
             toggleDeleteButton();
           });
-          const checkboxCell = document.createElement('td'); checkboxCell.className = 'px-4 py-2 whitespace-nowrap'; checkboxCell.appendChild(checkbox);
-          const dateCell = document.createElement('td'); dateCell.className = 'px-4 py-2 whitespace-nowrap text-gray-800'; dateCell.textContent = t.date;
-          const typeCell = document.createElement('td'); typeCell.className = 'px-4 py-2 whitespace-nowrap capitalize text-gray-800'; typeCell.textContent = t.type;
-          const amountCell = document.createElement('td'); amountCell.className = 'px-4 py-2 whitespace-nowrap'; amountCell.textContent = `$${(t.amount || 0).toLocaleString('es-CO', numberFormatOptions)}`;
-          if (t.type === 'ingreso') amountCell.classList.add('text-green-600', 'font-semibold'); else amountCell.classList.add('text-red-600', 'font-semibold');
-          row.appendChild(checkboxCell); row.appendChild(dateCell); row.appendChild(typeCell); row.appendChild(amountCell);
+          
+          const checkboxCell = document.createElement('td');
+          checkboxCell.className = 'text-center';
+          checkboxCell.appendChild(checkbox);
+          
+          const dateCell = document.createElement('td');
+          dateCell.textContent = t.date;
+          
+          const typeCell = document.createElement('td');
+          typeCell.innerHTML = `
+            <span class="px-2 py-1 rounded-full text-xs font-medium ${
+              t.type === 'ingreso' 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }">
+              ${t.type === 'ingreso' ? 'Ingreso' : 'Egreso'}
+            </span>
+          `;
+          
+          const amountCell = document.createElement('td');
+          amountCell.className = 'text-right font-semibold';
+          amountCell.textContent = `$${(t.amount || 0).toLocaleString('es-CO', numberFormatOptions)}`;
+          amountCell.classList.add(t.type === 'ingreso' ? 'text-green-600' : 'text-red-600');
+          
+          const descCell = document.createElement('td');
+          descCell.textContent = t.description || 'Sin descripción';
+          descCell.className = 'text-gray-500';
+          
+          row.appendChild(checkboxCell);
+          row.appendChild(dateCell);
+          row.appendChild(typeCell);
+          row.appendChild(amountCell);
+          row.appendChild(descCell);
+          
           transactionHistoryBody.appendChild(row);
         });
+        
         toggleDeleteButton();
       };
-
+      
       const updateTotalBalance = () => {
-        const total = transactions.reduce((sum, t) => t.type === 'ingreso' ? sum + (t.amount || 0) : sum - (t.amount || 0), 0);
+        if (!totalBalanceEl) return;
+        const total = transactions.reduce((sum, t) => 
+          t.type === 'ingreso' ? sum + (t.amount || 0) : sum - (t.amount || 0), 0);
+        
         totalBalanceEl.textContent = `$${total.toLocaleString('es-CO', numberFormatOptions)}`;
+        totalBalanceEl.className = `kpi-value ${total >= 0 ? 'text-gray-800' : 'text-red-600'}`;
       };
-
+      
       // Charts
       const updateCharts = () => {
+        if (!balanceChartCanvas || !balanceTrendChartCanvas || !salesByAdvisorPieChartCanvas) {
+          // Si faltan canvas, evitamos crear charts para que no rompa la ejecución
+          updateBalanceTrendChart(); // intenta actualizar tendencia si es posible
+          return;
+        }
         if (balanceChart) balanceChart.destroy();
         if (salesByAdvisorPieChart) salesByAdvisorPieChart.destroy();
-
-        const totalIncome = transactions.filter(t => t.type === 'ingreso').reduce((s, t) => s + (t.amount || 0), 0);
-        const totalExpense = transactions.filter(t => t.type === 'egreso').reduce((s, t) => s + (t.amount || 0), 0);
-
+        
+        const totalIncome = transactions.filter(t => t.type === 'ingreso')
+          .reduce((s, t) => s + (t.amount || 0), 0);
+        const totalExpense = transactions.filter(t => t.type === 'egreso')
+          .reduce((s, t) => s + (t.amount || 0), 0);
+        
         balanceChart = new Chart(balanceChartCanvas, {
           type: 'doughnut',
-          data: { labels: ['Ingresos', 'Egresos'], datasets: [{ data: [totalIncome, totalExpense], backgroundColor: incomeExpenseColors, hoverOffset: 4 }] },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom', align: 'center', labels: { color: '#333', usePointStyle: true } },
-              tooltip: {
-                callbacks: {
-                  label: (context) => {
-                    const label = context.label || '';
-                    const value = context.parsed;
-                    const total = context.dataset.data.reduce((sum, cur) => sum + cur, 0);
-                    const percentage = total ? ((value / total) * 100).toFixed(2) + '%' : '0%';
-                    return `${label}: ${percentage}`;
-                  }
-                }
-              }
-            }
-          }
-        });
-
-        updateBalanceTrendChart(); // actualiza también la tendencia
-      };
-
-      const updateBalanceTrendChart = () => {
-        if (balanceTrendChart) balanceTrendChart.destroy();
-        let filtered = [...transactions];
-        if (dateFilter.type !== 'all') {
-          filtered = transactions.filter(t => t.date >= dateFilter.start && t.date <= dateFilter.end);
-        }
-
-        const dailyData = filtered.reduce((acc, t) => {
-          const dt = t.date;
-          if (!acc[dt]) acc[dt] = { income: 0, expense: 0 };
-          if (t.type === 'ingreso') acc[dt].income += t.amount || 0; else acc[dt].expense += t.amount || 0;
-          return acc;
-        }, {});
-
-        const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(a) - new Date(b));
-        let running = 0;
-        const dailyBalances = sortedDates.map(d => {
-          running += (dailyData[d].income - dailyData[d].expense);
-          return running;
-        });
-
-        balanceTrendChart = new Chart(balanceTrendChartCanvas, {
-          type: 'line',
           data: {
-            labels: sortedDates,
+            labels: ['Ingresos', 'Egresos'],
             datasets: [{
-              label: 'Balance Diario',
-              data: dailyBalances,
-              borderColor: '#4270ff',
-              backgroundColor: `rgba(${getComputedStyle(document.documentElement).getPropertyValue('--accent-rgba')},0.08)`,
-              tension: 0.12,
-              fill: true
+              data: [totalIncome, totalExpense],
+              backgroundColor: incomeExpenseColors,
+              borderWidth: 0,
+              hoverOffset: 8
             }]
           },
           options: {
             responsive: true,
-            scales: {
-              x: { title: { display: true, text: 'Fecha', color: '#333' }, ticks: { color: '#333' } },
-              y: { beginAtZero: false, title: { display: true, text: 'Balance ($)', color: '#333' }, ticks: { color: '#333' } }
-            }
-          }
-        });
-      };
-
-      // Helpers para procesar Google Sheets y advisors
-      const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
-      const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
-
-      const fetchAndProcessSheetsData = async () => {
-        advisorsLoadingState.classList.remove('hidden');
-        advisorsTable.classList.add('hidden');
-        try {
-          const cacheBuster = Date.now();
-          const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&range=A:L&t=${cacheBuster}`;
-          const resp = await fetch(url);
-          if (!resp.ok) throw new Error(`${resp.status}: ${resp.statusText}`);
-          const text = await resp.text();
-          const jsonStart = text.indexOf('{');
-          const jsonEnd = text.lastIndexOf('}') + 1;
-          if (jsonStart === -1 || jsonEnd === 0) throw new Error('Respuesta inesperada al consultar Google Sheets');
-          const jsonText = text.substring(jsonStart, jsonEnd);
-          const data = JSON.parse(jsonText);
-          if (!data.table || !data.table.rows) throw new Error('Estructura de datos inesperada');
-
-          let totalSales = 0;
-          const advisorsMap = new Map();
-          let datesWithSales = new Set();
-
-          data.table.rows.forEach(row => {
-            if (!row.c) return;
-            const advisorCell = row.c[ADVISOR_COLUMN_INDEX];
-            if (advisorCell && advisorCell.v !== null && advisorCell.v !== undefined) {
-              let advisorName = String(advisorCell.v).trim();
-              const normalized = normalizeName(advisorName);
-              if (!normalized || normalized === 'danna') return; // regla previa
-              let displayName = advisorName;
-              if (normalized === 'luz') displayName = 'Alejandra';
-
-              let dailySales = 0;
-              for (let i = SALES_COLUMN_START; i <= SALES_COLUMN_END; i++) {
-                if (row.c[i]) {
-                  const cell = row.c[i];
-                  const value = cell.v !== null && cell.v !== undefined ? cell.v : (cell.f || 0);
-                  dailySales += parseSalesValue(value);
-                }
-              }
-
-              if (!advisorsMap.has(normalized)) advisorsMap.set(normalized, { name: displayName, sales: 0 });
-              advisorsMap.get(normalized).sales += dailySales;
-              totalSales += dailySales;
-              if (dailySales > 0 && row.c[0] && (row.c[0].v || row.c[0].f)) {
-                const dateValue = row.c[0].v || row.c[0].f;
-                datesWithSales.add(String(dateValue));
-              }
-            }
-          });
-
-          const advisorsData = Array.from(advisorsMap.values());
-          renderAdvisors(advisorsData);
-          updateSalesStats(totalSales, datesWithSales.size);
-          updateSalesByAdvisorPieChart(advisorsData);
-
-        } catch (error) {
-          advisorsTableBody.innerHTML = `<tr><td colspan="2" class="px-4 py-2 text-center text-red-500">Error al cargar los datos: ${error.message}</td></tr>`;
-        } finally {
-          advisorsLoadingState.classList.add('hidden');
-          advisorsTable.classList.remove('hidden');
-        }
-      };
-
-      const updateSalesStats = (totalSales, numberOfDays) => {
-        const avgSales = numberOfDays > 0 ? totalSales / numberOfDays : 0;
-        avgSalesEl.textContent = Math.round(avgSales).toLocaleString('es-CO', numberFormatOptions);
-        totalSalesEl.textContent = totalSales.toLocaleString('es-CO', numberFormatOptions);
-      };
-
-      const renderAdvisors = (advisors) => {
-        advisorsTableBody.innerHTML = '';
-        const sorted = advisors.sort((a, b) => b.sales - a.sales);
-        if (sorted.length) {
-          sorted.forEach(a => {
-            const row = document.createElement('tr');
-            row.className = "hover:bg-gray-50 transition-colors duration-150";
-            row.innerHTML = `<td class="px-4 py-2 whitespace-nowrap text-gray-800">${a.name}</td><td class="px-4 py-2 whitespace-nowrap text-gray-800">${a.sales.toLocaleString('es-CO')}</td>`;
-            advisorsTableBody.appendChild(row);
-          });
-        } else {
-          advisorsTableBody.innerHTML = '<tr><td colspan="2" class="px-4 py-2 text-center text-gray-500">No hay datos de asesoras disponibles.</td></tr>';
-        }
-      };
-
-      const updateSalesByAdvisorPieChart = (advisorsData) => {
-        if (salesByAdvisorPieChart) salesByAdvisorPieChart.destroy();
-        const sorted = [...advisorsData].sort((a, b) => b.sales - a.sales);
-        const labels = sorted.map(d => d.name);
-        const data = sorted.map(d => d.sales);
-        const backgroundColors = sorted.map((_, i) => advisorColors[i % advisorColors.length]);
-
-        salesByAdvisorPieChart = new Chart(salesByAdvisorPieChartCanvas, {
-          type: 'doughnut',
-          data: { labels, datasets: [{ data, backgroundColor: backgroundColors, hoverOffset: 4 }] },
-          options: {
-            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'bottom', align: 'center', labels: { color: '#333', usePointStyle: true } },
+              legend: {
+                position: 'bottom',
+                labels: {
+                  padding: 20,
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
               tooltip: {
                 callbacks: {
                   label: (context) => {
@@ -936,27 +1170,282 @@
             }
           }
         });
+        
+        updateBalanceTrendChart();
       };
-
+      
+      const updateBalanceTrendChart = () => {
+        if (!balanceTrendChartCanvas) return;
+        if (balanceTrendChart) balanceTrendChart.destroy();
+        
+        let filtered = [...transactions];
+        if (dateFilter.type !== 'all') {
+          filtered = transactions.filter(t => t.date >= dateFilter.start && t.date <= dateFilter.end);
+        }
+        
+        const dailyData = filtered.reduce((acc, t) => {
+          const dt = t.date;
+          if (!acc[dt]) acc[dt] = { income: 0, expense: 0 };
+          if (t.type === 'ingreso') acc[dt].income += t.amount || 0;
+          else acc[dt].expense += t.amount || 0;
+          return acc;
+        }, {});
+        
+        const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(a) - new Date(b));
+        let running = 0;
+        const dailyBalances = sortedDates.map(d => {
+          running += (dailyData[d].income - dailyData[d].expense);
+          return running;
+        });
+        
+        balanceTrendChart = new Chart(balanceTrendChartCanvas, {
+          type: 'line',
+          data: {
+            labels: sortedDates,
+            datasets: [{
+              label: 'Balance Acumulado',
+              data: dailyBalances,
+              borderColor: '#4270ff',
+              backgroundColor: 'rgba(66, 112, 255, 0.08)',
+              borderWidth: 2,
+              tension: 0.1,
+              fill: true,
+              pointBackgroundColor: '#001499',
+              pointRadius: 3,
+              pointHoverRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                grid: {
+                  display: false
+                }
+              },
+              y: {
+                beginAtZero: false,
+                grid: {
+                  color: 'rgba(0,0,0,0.05)'
+                },
+                ticks: {
+                  callback: function(value) {
+                    return '$' + value.toLocaleString('es-CO');
+                  }
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context) => {
+                    return `Balance: $${context.parsed.y.toLocaleString('es-CO')}`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      };
+      
+      // Helpers para procesar Google Sheets y advisors
+      const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
+      const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
+      
+      const fetchAndProcessSheetsData = async () => {
+        if (advisorsLoadingState) advisorsLoadingState.classList.remove('hidden');
+        if (advisorsTableContent) advisorsTableContent.classList.add('hidden');
+        
+        try {
+          const cacheBuster = Date.now();
+          const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&range=A:L&t=${cacheBuster}`;
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error(`${resp.status}: ${resp.statusText}`);
+          
+          const text = await resp.text();
+          
+          // Extraer el JSON de google.visualization.Query.setResponse(...)
+          const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+          if (!match || !match[1]) throw new Error('Respuesta inesperada al consultar Google Sheets (no se encontró JSON)');
+          
+          const data = JSON.parse(match[1]);
+          
+          if (!data.table || !data.table.rows) throw new Error('Estructura de datos inesperada');
+          
+          let totalSales = 0;
+          const advisorsMap = new Map();
+          let datesWithSales = new Set();
+          
+          data.table.rows.forEach(row => {
+            if (!row.c) return;
+            
+            const advisorCell = row.c[ADVISOR_COLUMN_INDEX];
+            if (advisorCell && advisorCell.v !== null && advisorCell.v !== undefined) {
+              let advisorName = String(advisorCell.v).trim();
+              const normalized = normalizeName(advisorName);
+              
+              if (!normalized || normalized === 'danna') return;
+              
+              let displayName = advisorName;
+              if (normalized === 'luz') displayName = 'Alejandra';
+              
+              let dailySales = 0;
+              for (let i = SALES_COLUMN_START; i <= SALES_COLUMN_END; i++) {
+                if (row.c[i]) {
+                  const cell = row.c[i];
+                  const value = (cell.v !== null && cell.v !== undefined) ? cell.v : (cell.f || 0);
+                  dailySales += parseSalesValue(value);
+                }
+              }
+              
+              if (!advisorsMap.has(normalized)) {
+                advisorsMap.set(normalized, { name: displayName, sales: 0 });
+              }
+              advisorsMap.get(normalized).sales += dailySales;
+              totalSales += dailySales;
+              
+              if (dailySales > 0 && row.c[0]) {
+                const dateValue = row.c[0].v ?? row.c[0].f;
+                if (dateValue !== null && dateValue !== undefined) {
+                  datesWithSales.add(String(dateValue));
+                }
+              }
+            }
+          });
+          
+          const advisorsData = Array.from(advisorsMap.values());
+          renderAdvisors(advisorsData);
+          updateSalesStats(totalSales, datesWithSales.size);
+          updateSalesByAdvisorPieChart(advisorsData);
+          
+        } catch (error) {
+          if (advisorsTableBody) {
+            advisorsTableBody.innerHTML = `
+              <tr>
+                <td colspan="3" class="text-center p-4 text-red-500">
+                  Error al cargar los datos: ${error.message}
+                </td>
+              </tr>
+            `;
+          }
+          if (advisorsTableContent) advisorsTableContent.classList.remove('hidden');
+        } finally {
+          if (advisorsLoadingState) advisorsLoadingState.classList.add('hidden');
+          if (advisorsTableContent) advisorsTableContent.classList.remove('hidden');
+        }
+      };
+      
+      const updateSalesStats = (totalSales, numberOfDays) => {
+        const avgSales = numberOfDays > 0 ? totalSales / numberOfDays : 0;
+        if (avgSalesEl) avgSalesEl.textContent = Math.round(avgSales).toLocaleString('es-CO', numberFormatOptions);
+        if (totalSalesEl) totalSalesEl.textContent = totalSales.toLocaleString('es-CO', numberFormatOptions);
+      };
+      
+      const renderAdvisors = (advisors) => {
+        if (!advisorsTableBody) return;
+        advisorsTableBody.innerHTML = '';
+        
+        const sorted = advisors.sort((a, b) => b.sales - a.sales);
+        const totalSales = sorted.reduce((sum, a) => sum + a.sales, 0);
+        
+        if (sorted.length) {
+          sorted.forEach(a => {
+            const percentage = totalSales > 0 ? ((a.sales / totalSales) * 100).toFixed(1) : 0;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td class="font-medium">${a.name}</td>
+              <td class="text-right font-semibold">${a.sales.toLocaleString('es-CO')}</td>
+              <td class="text-right text-gray-500">${percentage}%</td>
+            `;
+            advisorsTableBody.appendChild(row);
+          });
+        } else {
+          advisorsTableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="text-center p-4 text-gray-500">
+                No hay datos de asesoras disponibles.
+              </td>
+            </tr>
+          `;
+        }
+      };
+      
+      const updateSalesByAdvisorPieChart = (advisorsData) => {
+        if (!salesByAdvisorPieChartCanvas) return;
+        if (salesByAdvisorPieChart) salesByAdvisorPieChart.destroy();
+        
+        const sorted = [...advisorsData].sort((a, b) => b.sales - a.sales);
+        const labels = sorted.map(d => d.name);
+        const data = sorted.map(d => d.sales);
+        const backgroundColors = sorted.map((_, i) => advisorColors[i % advisorColors.length]);
+        
+        salesByAdvisorPieChart = new Chart(salesByAdvisorPieChartCanvas, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{
+              data,
+              backgroundColor: backgroundColors,
+              borderWidth: 0,
+              hoverOffset: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  padding: 20,
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context) => {
+                    const label = context.label || '';
+                    const value = context.parsed;
+                    const total = context.dataset.data.reduce((sum, cur) => sum + cur, 0);
+                    const percentage = total ? ((value / total) * 100).toFixed(2) + '%' : '0%';
+                    return `${label}: ${value.toLocaleString('es-CO')} (${percentage})`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      };
+      
       // Operaciones sobre transacciones (forms)
-      transactionForm.addEventListener('submit', (e) => {
+      transactionForm?.addEventListener('submit', (e) => {
         e.preventDefault();
+        
         const newTransaction = {
           id: generateUniqueId(),
-          date: $('transaction-date').value,
-          type: $('transaction-type').value,
+          date: $('transaction-date').value || DateTime.now().toISODate(),
+          type: $('transaction-type').value || 'ingreso',
           amount: parseInt($('transaction-amount').value, 10) || 0,
           time: DateTime.now().toFormat('HH:mm:ss')
         };
+        
         transactions.push(newTransaction);
         saveToLocalStorage('novaklar_transactions', transactions);
         updateUI();
+        
         transactionForm.reset();
-        $('transaction-date').value = DateTime.now().toISODate();
+        if ($('transaction-date')) $('transaction-date').value = DateTime.now().toISODate();
       });
-
-      manualSalesForm.addEventListener('submit', (e) => {
+      
+      manualSalesForm?.addEventListener('submit', (e) => {
         e.preventDefault();
+        
         const amount = parseInt($('manual-sales-amount').value, 10) || 0;
         if (amount > 0) {
           manualSalesTotal += amount;
@@ -965,59 +1454,73 @@
           manualSalesForm.reset();
         }
       });
-
+      
       // Clear local data
-      clearDataButton.addEventListener('click', () => {
+      clearDataButton?.addEventListener('click', () => {
         if (!confirm('¿Eliminar todos los datos locales? Esta acción es irreversible.')) return;
-        localStorage.removeItem('novaklar_transactions');
-        localStorage.removeItem('novaklar_manual_sales_total');
-        transactions = []; manualSalesTotal = 0; selectedTransactions.clear();
+        
+        try {
+          localStorage.removeItem('novaklar_transactions');
+          localStorage.removeItem('novaklar_manual_sales_total');
+        } catch (e) { /* ignore */ }
+        transactions = [];
+        manualSalesTotal = 0;
+        selectedTransactions.clear();
         updateUI();
       });
-
+      
       // Delete selection setup
       setupTransactionDeletion();
-
+      
       // Small KPI updater
       const updateKpisQuick = () => {
         const today = DateTime.now().toISODate();
         const incomeToday = sumTransactions(t => t.type === 'ingreso' && t.date === today);
         const expenseToday = sumTransactions(t => t.type === 'egreso' && t.date === today);
         const margin = incomeToday ? Math.round(((incomeToday - expenseToday) / incomeToday) * 100) : 0;
-        kpiIncomeTodayEl.textContent = `$${incomeToday.toLocaleString('es-CO', numberFormatOptions)}`;
-        kpiExpenseTodayEl.textContent = `$${expenseToday.toLocaleString('es-CO', numberFormatOptions)}`;
-        kpiMarginEl.textContent = `${margin}%`;
-        kpiMarginEl.className = `text-lg font-bold ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        
+        if (kpiIncomeTodayEl) kpiIncomeTodayEl.textContent = `$${incomeToday.toLocaleString('es-CO', numberFormatOptions)}`;
+        if (kpiExpenseTodayEl) kpiExpenseTodayEl.textContent = `$${expenseToday.toLocaleString('es-CO', numberFormatOptions)}`;
+        if (kpiMarginEl) {
+          kpiMarginEl.textContent = `${margin}%`;
+          kpiMarginEl.className = `kpi-value ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        }
       };
-
+      
       // Update global UI
       const updateUI = () => {
         updateTotalBalance();
         updateCharts();
         renderTransactions();
         updateManualSalesTotal();
-        calculateGrowth(growthPeriodSelector.value);
+        calculateGrowth(growthPeriodSelector?.value || 'daily');
         calculateCashFlowProjection();
         checkForAlerts();
         updateAutomaticNote();
-        calculateLastMonthIncome();
         updateCashFlow();
         updateKpisQuick();
+        // fetchAndProcessSheetsData se llama dentro updateUI para asegurar sincronía inicial
         fetchAndProcessSheetsData();
       };
-
+      
       // Inicializaciones
-      $('transaction-date').value = DateTime.now().toISODate();
-      setupDateRangeFilter();
+      if ($('transaction-date')) $('transaction-date').value = DateTime.now().toISODate();
+      
       // Inicializar selectores que afectan cálculo
-      growthPeriodSelector.addEventListener('change', () => calculateGrowth(growthPeriodSelector.value));
-
-      // Lógica para borrar selectores en storage (si cambian fuera)
+      growthPeriodSelector?.addEventListener('change', () => calculateGrowth(growthPeriodSelector.value));
+      
+      // Lógica para sincronización entre pestañas
       window.addEventListener('storage', (e) => {
-        if (e.key === 'novaklar_transactions') { transactions = getFromLocalStorage('novaklar_transactions', []); updateUI(); }
-        if (e.key === 'novaklar_manual_sales_total') { manualSalesTotal = getFromLocalStorage('novaklar_manual_sales_total', 0); updateManualSalesTotal(); }
+        if (e.key === 'novaklar_transactions') {
+          transactions = getFromLocalStorage('novaklar_transactions', []);
+          updateUI();
+        }
+        if (e.key === 'novaklar_manual_sales_total') {
+          manualSalesTotal = getFromLocalStorage('novaklar_manual_sales_total', 0);
+          updateManualSalesTotal();
+        }
       });
-
+      
       // Llamada inicial y polling de hojas
       updateUI();
       setInterval(fetchAndProcessSheetsData, UPDATE_INTERVAL);
