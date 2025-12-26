@@ -634,31 +634,31 @@
       <div class="kpi-card-new">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Ingresos Mes</div>
-            <div id="total-income-month" class="kpi-value-new text-green-600">$0</div>
+            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Ventas Totales Mes</div>
+            <div id="total-sales-month" class="kpi-value-new text-green-600">0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
             <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Total ingresos este mes</div>
+        <div class="text-xs text-[#080a33]/40">Ventas acumuladas este mes</div>
       </div>
 
       <div class="kpi-card-new">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Egresos Mes</div>
-            <div id="total-expense-month" class="kpi-value-new text-red-600">$0</div>
+            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Promedio Diario</div>
+            <div id="avg-daily-sales" class="kpi-value-new text-[#7fcfda]">0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
-            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            <svg class="w-6 h-6 text-[#7fcfda]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Total gastos este mes</div>
+        <div class="text-xs text-[#080a33]/40">Promedio de ventas por día</div>
       </div>
     </section>
 
@@ -756,7 +756,7 @@
                     class="btn-secondary-new opacity-0 pointer-events-none transition-all duration-300">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
+            </svg>
               Eliminar Seleccionadas
             </button>
           </div>
@@ -1022,8 +1022,8 @@
       const manualSalesTotalEl = $('manual-sales-total');
       const totalBalanceEl = $('total-balance');
       const netCashFlowEl = $('net-cash-flow');
-      const totalIncomeMonthEl = $('total-income-month');
-      const totalExpenseMonthEl = $('total-expense-month');
+      const totalSalesMonthEl = $('total-sales-month');
+      const avgDailySalesEl = $('avg-daily-sales');
       const automaticNoteEl = $('automatic-note');
       const lastTransactionNoteEl = $('last-transaction-note');
       const alertsContainer = $('alerts-container');
@@ -1059,6 +1059,8 @@
       let manualSalesTotal = getFromLocalStorage('novaklar_manual_sales_total', 0);
       let dateFilter = { type: 'last10', start: null, end: null };
       let selectedTransactions = new Set();
+      let totalMonthSales = 0;
+      let avgMonthDailySales = 0;
       
       function saveToLocalStorage(key, data) {
         try {
@@ -1328,13 +1330,8 @@
         
         const net = cashInflow - cashOutflow;
         
-        if (totalIncomeMonthEl) {
-          totalIncomeMonthEl.textContent = `$${cashInflow.toLocaleString('es-CO', numberFormatOptions)}`;
-        }
-        
-        if (totalExpenseMonthEl) {
-          totalExpenseMonthEl.textContent = `$${cashOutflow.toLocaleString('es-CO', numberFormatOptions)}`;
-        }
+        // Actualizar métricas de ventas del mes
+        updateMonthSalesMetrics();
         
         if (netCashFlowEl) {
           netCashFlowEl.textContent = `$${net.toLocaleString('es-CO', numberFormatOptions)}`;
@@ -1342,6 +1339,21 @@
         }
         
         return { cashInflow, cashOutflow, net };
+      };
+      
+      const updateMonthSalesMetrics = () => {
+        const now = DateTime.now();
+        
+        // Usamos las ventas del Google Sheets
+        if (totalSalesMonthEl) {
+          totalSalesMonthEl.textContent = totalMonthSales.toLocaleString('es-CO', numberFormatOptions);
+        }
+        
+        if (avgDailySalesEl) {
+          const daysPassed = Math.max(1, now.day);
+          avgMonthDailySales = totalMonthSales > 0 ? Math.round(totalMonthSales / daysPassed) : 0;
+          avgDailySalesEl.textContent = avgMonthDailySales.toLocaleString('es-CO', numberFormatOptions);
+        }
       };
       
       const showFlowDetailsModal = () => {
@@ -1785,7 +1797,7 @@
           
           if (!data.table || !data.table.rows) throw new Error('Estructura de datos inesperada');
           
-          let totalSales = 0;
+          totalMonthSales = 0;
           const advisorsMap = new Map();
           let datesWithSales = new Set();
           
@@ -1829,7 +1841,7 @@
                 }
                 
                 advisorsMap.get(mappedAdvisor).sales += dailySales;
-                totalSales += dailySales;
+                totalMonthSales += dailySales;
                 
                 if (dailySales > 0 && row.c[0]) {
                   const dateValue = row.c[0].v ?? row.c[0].f;
@@ -1852,6 +1864,7 @@
           }
           
           renderAdvisors(advisorsData);
+          updateMonthSalesMetrics();
           
         } catch (error) {
           if (advisorsTableBody) {
