@@ -730,7 +730,7 @@
             <div>
               <h3 class="font-semibold text-[#080a33] mb-4 flex items-center gap-2">
                 <span>Ingresos vs Egresos</span>
-                <span class="badge badge-primary">Mes Actual</span>
+                <span class="badge badge-primary" id="chart-period-badge">Últimos 10 días</span>
               </h3>
               <div class="chart-container-modern">
                 <canvas id="balance-chart"></canvas>
@@ -1041,6 +1041,7 @@
       const closeFlowModal = $('close-flow-modal');
       const netCashFlowCard = $('net-cash-flow-card');
       const currentPeriodDisplay = $('current-period-display');
+      const chartPeriodBadge = $('chart-period-badge');
       
       const exportDataButton = $('export-data-button');
       const copyDataButton = $('copy-data-button');
@@ -1173,6 +1174,38 @@
       
       function sumTransactions(predicate) {
         return transactions.filter(predicate).reduce((s, t) => s + (t.amount || 0), 0);
+      }
+      
+      // Función para obtener transacciones filtradas por periodo
+      function getFilteredTransactions() {
+        const now = DateTime.now();
+        let startDate, endDate;
+        
+        switch(dateFilter.type) {
+          case 'last10':
+            startDate = now.minus({ days: 10 }).toISODate();
+            endDate = now.toISODate();
+            break;
+          case 'month':
+            startDate = now.startOf('month').toISODate();
+            endDate = now.endOf('month').toISODate();
+            break;
+          case 'all':
+            return transactions; // Devolver todas sin filtrar
+          case 'custom':
+            startDate = dateFilter.start;
+            endDate = dateFilter.end;
+            break;
+          default:
+            startDate = now.minus({ days: 10 }).toISODate();
+            endDate = now.toISODate();
+        }
+        
+        if (startDate && endDate) {
+          return transactions.filter(t => t.date >= startDate && t.date <= endDate);
+        }
+        
+        return transactions;
       }
       
       const checkForAlerts = () => {
@@ -1460,54 +1493,95 @@
         }
         if (balanceChart) balanceChart.destroy();
         
-        const now = DateTime.now();
-        const totalIncome = sumTransactions(t => {
-          const d = DateTime.fromISO(t.date);
-          return d.month === now.month && d.year === now.year && t.type === 'ingreso';
-        });
+        // Usar transacciones filtradas para ambas gráficas
+        const filteredTransactions = getFilteredTransactions();
         
-        const totalExpense = sumTransactions(t => {
-          const d = DateTime.fromISO(t.date);
-          return d.month === now.month && d.year === now.year && t.type === 'egreso';
-        });
+        const totalIncome = filteredTransactions
+          .filter(t => t.type === 'ingreso')
+          .reduce((s, t) => s + (t.amount || 0), 0);
         
-        balanceChart = new Chart(balanceChartCanvas, {
-          type: 'doughnut',
-          data: {
-            labels: ['Ingresos', 'Egresos'],
-            datasets: [{
-              data: [totalIncome, totalExpense],
-              backgroundColor: incomeExpenseColors,
-              borderWidth: 0,
-              hoverOffset: 8
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: {
-                  padding: 20,
-                  usePointStyle: true,
-                  pointStyle: 'circle'
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: (context) => {
-                    const label = context.label || '';
-                    const value = context.parsed;
-                    const total = context.dataset.data.reduce((sum, cur) => sum + cur, 0);
-                    const percentage = total ? ((value / total) * 100).toFixed(2) + '%' : '0%';
-                    return `${label}: $${value.toLocaleString('es-CO')} (${percentage})`;
+        const totalExpense = filteredTransactions
+          .filter(t => t.type === 'egreso')
+          .reduce((s, t) => s + (t.amount || 0), 0);
+        
+        // Actualizar badge del periodo
+        if (chartPeriodBadge) {
+          let periodText = '';
+          switch(dateFilter.type) {
+            case 'last10': periodText = 'Últimos 10 días'; break;
+            case 'month': periodText = 'Mes Actual'; break;
+            case 'all': periodText = 'Periodo Completo'; break;
+            case 'custom': periodText = 'Personalizado'; break;
+            default: periodText = 'Últimos 10 días';
+          }
+          chartPeriodBadge.textContent = periodText;
+        }
+        
+        // Solo crear la gráfica si hay datos
+        if (totalIncome > 0 || totalExpense > 0) {
+          balanceChart = new Chart(balanceChartCanvas, {
+            type: 'doughnut',
+            data: {
+              labels: ['Ingresos', 'Egresos'],
+              datasets: [{
+                data: [totalIncome, totalExpense],
+                backgroundColor: incomeExpenseColors,
+                borderWidth: 0,
+                hoverOffset: 8
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      const label = context.label || '';
+                      const value = context.parsed;
+                      const total = context.dataset.data.reduce((sum, cur) => sum + cur, 0);
+                      const percentage = total ? ((value / total) * 100).toFixed(2) + '%' : '0%';
+                      return `${label}: $${value.toLocaleString('es-CO')} (${percentage})`;
+                    }
                   }
                 }
               }
             }
-          }
-        });
+          });
+        } else {
+          // Mostrar gráfica vacía si no hay datos
+          balanceChart = new Chart(balanceChartCanvas, {
+            type: 'doughnut',
+            data: {
+              labels: ['Sin datos'],
+              datasets: [{
+                data: [1],
+                backgroundColor: ['#e5e7eb'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  enabled: false
+                }
+              }
+            }
+          });
+        }
         
         updateBalanceTrendChart();
       };
@@ -1516,37 +1590,9 @@
         if (!balanceTrendChartCanvas) return;
         if (balanceTrendChart) balanceTrendChart.destroy();
         
-        const now = DateTime.now();
-        let startDate, endDate;
+        const filteredTransactions = getFilteredTransactions();
         
-        switch(dateFilter.type) {
-          case 'last10':
-            startDate = now.minus({ days: 10 }).toISODate();
-            endDate = now.toISODate();
-            break;
-          case 'month':
-            startDate = now.startOf('month').toISODate();
-            endDate = now.endOf('month').toISODate();
-            break;
-          case 'all':
-            startDate = null;
-            endDate = null;
-            break;
-          case 'custom':
-            startDate = dateFilter.start;
-            endDate = dateFilter.end;
-            break;
-          default:
-            startDate = now.minus({ days: 10 }).toISODate();
-            endDate = now.toISODate();
-        }
-        
-        let filtered = [...transactions];
-        if (startDate && endDate) {
-          filtered = transactions.filter(t => t.date >= startDate && t.date <= endDate);
-        }
-        
-        const dailyData = filtered.reduce((acc, t) => {
+        const dailyData = filteredTransactions.reduce((acc, t) => {
           const dt = t.date;
           if (!acc[dt]) acc[dt] = { income: 0, expense: 0 };
           if (t.type === 'ingreso') acc[dt].income += t.amount || 0;
@@ -1569,8 +1615,8 @@
             case 'month': displayText = 'Mes Actual'; break;
             case 'all': displayText = 'Periodo Completo'; break;
             case 'custom': 
-              if (startDate && endDate) {
-                displayText = `${DateTime.fromISO(startDate).toFormat('dd/MM')} - ${DateTime.fromISO(endDate).toFormat('dd/MM')}`;
+              if (dateFilter.start && dateFilter.end) {
+                displayText = `${DateTime.fromISO(dateFilter.start).toFormat('dd/MM')} - ${DateTime.fromISO(dateFilter.end).toFormat('dd/MM')}`;
               } else {
                 displayText = 'Periodo Personalizado';
               }
@@ -1580,58 +1626,106 @@
           currentPeriodDisplay.textContent = displayText;
         }
         
-        balanceTrendChart = new Chart(balanceTrendChartCanvas, {
-          type: 'line',
-          data: {
-            labels: sortedDates,
-            datasets: [{
-              label: 'Balance Acumulado',
-              data: dailyBalances,
-              borderColor: '#0d4c7f',
-              backgroundColor: 'rgba(13, 76, 127, 0.08)',
-              borderWidth: 2,
-              tension: 0.1,
-              fill: true,
-              pointBackgroundColor: '#0d4c7f',
-              pointRadius: 3,
-              pointHoverRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                grid: {
-                  display: false
-                }
-              },
-              y: {
-                beginAtZero: false,
-                grid: {
-                  color: 'rgba(0,0,0,0.05)'
+        // Solo crear la gráfica si hay datos
+        if (sortedDates.length > 0) {
+          balanceTrendChart = new Chart(balanceTrendChartCanvas, {
+            type: 'line',
+            data: {
+              labels: sortedDates,
+              datasets: [{
+                label: 'Balance Acumulado',
+                data: dailyBalances,
+                borderColor: '#0d4c7f',
+                backgroundColor: 'rgba(13, 76, 127, 0.08)',
+                borderWidth: 2,
+                tension: 0.1,
+                fill: true,
+                pointBackgroundColor: '#0d4c7f',
+                pointRadius: 3,
+                pointHoverRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  grid: {
+                    display: false
+                  }
                 },
-                ticks: {
-                  callback: function(value) {
-                    return '$' + value.toLocaleString('es-CO');
+                y: {
+                  beginAtZero: false,
+                  grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                  },
+                  ticks: {
+                    callback: function(value) {
+                      return '$' + value.toLocaleString('es-CO');
+                    }
                   }
                 }
-              }
-            },
-            plugins: {
-              legend: {
-                display: false
               },
-              tooltip: {
-                callbacks: {
-                  label: (context) => {
-                    return `Balance: $${context.parsed.y.toLocaleString('es-CO')}`;
+              plugins: {
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      return `Balance: $${context.parsed.y.toLocaleString('es-CO')}`;
+                    }
                   }
                 }
               }
             }
-          }
-        });
+          });
+        } else {
+          // Mostrar gráfica vacía si no hay datos
+          balanceTrendChart = new Chart(balanceTrendChartCanvas, {
+            type: 'line',
+            data: {
+              labels: ['Sin datos'],
+              datasets: [{
+                label: 'Balance Acumulado',
+                data: [0],
+                borderColor: '#e5e7eb',
+                backgroundColor: 'rgba(229, 231, 235, 0.1)',
+                borderWidth: 2,
+                tension: 0.1,
+                fill: true,
+                pointBackgroundColor: '#e5e7eb'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  grid: {
+                    display: false
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                  },
+                  ticks: {
+                    callback: function(value) {
+                      return '$' + value.toLocaleString('es-CO');
+                    }
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            }
+          });
+        }
       };
       
       // Configurar filtros de periodo
@@ -1644,7 +1738,7 @@
           btn.classList.add('active');
           // Actualizar filtro
           dateFilter.type = btn.dataset.period;
-          updateBalanceTrendChart();
+          updateCharts(); // Actualizar ambas gráficas
         });
       });
       
@@ -1652,8 +1746,8 @@
       const customPeriodBtn = document.getElementById('custom-period-btn');
       if (customPeriodBtn) {
         customPeriodBtn.addEventListener('click', () => {
-          const startDate = prompt('Ingresa fecha de inicio (YYYY-MM-DD):');
-          const endDate = prompt('Ingresa fecha de fin (YYYY-MM-DD):');
+          const startDate = prompt('Ingresa fecha de inicio (YYYY-MM-DD):', DateTime.now().minus({ days: 30 }).toISODate());
+          const endDate = prompt('Ingresa fecha de fin (YYYY-MM-DD):', DateTime.now().toISODate());
           
           if (startDate && endDate) {
             dateFilter.type = 'custom';
@@ -1664,7 +1758,7 @@
             periodButtons.forEach(b => b.classList.remove('active'));
             customPeriodBtn.classList.add('active');
             
-            updateBalanceTrendChart();
+            updateCharts(); // Actualizar ambas gráficas
           }
         });
       }
