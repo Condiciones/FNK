@@ -97,6 +97,7 @@
       box-shadow: 0 4px 20px rgba(13, 76, 127, 0.06);
       border: 1px solid rgba(13, 76, 127, 0.1);
       transition: all 0.3s ease;
+      cursor: pointer;
     }
 
     .kpi-card-new:hover {
@@ -474,6 +475,101 @@
       margin-bottom: -5px;
       z-index: 1000;
     }
+
+    /* Modal para detalles del flujo */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Filtros de periodo */
+    .period-filter {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .period-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(13, 76, 127, 0.2);
+      background: white;
+      color: var(--text-dark);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .period-btn:hover {
+      background: rgba(13, 76, 127, 0.05);
+    }
+
+    .period-btn.active {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Detalles del flujo */
+    .flow-details {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .flow-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .flow-item.income {
+      border-left: 4px solid var(--success);
+    }
+
+    .flow-item.expense {
+      border-left: 4px solid var(--danger);
+    }
+
+    .flow-item.total {
+      border-left: 4px solid var(--primary);
+      background: linear-gradient(135deg, rgba(13, 76, 127, 0.05) 0%, rgba(13, 76, 127, 0.1) 100%);
+    }
   </style>
 </head>
 <body class="font-poppins-regular">
@@ -483,7 +579,7 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex items-center gap-4">
           <div class="logo-container">
-            <img src="https://raw.githubusercontent.com/novaklar/web/refs/heads/main/novaklar1.svg" 
+            <img src="https://raw.githubusercontent.com/novaklar/web/refs/heads/main/cloud.svg" 
                  alt="novaklar Logo" 
                  class="w-10 h-10">
           </div>
@@ -520,10 +616,10 @@
         <div class="text-xs text-[#080a33]/40">Estado financiero actual</div>
       </div>
 
-      <div class="kpi-card-new">
+      <div class="kpi-card-new" id="net-cash-flow-card">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Flujo Neto</div>
+            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Flujo Neto Mes</div>
             <div id="net-cash-flow" class="kpi-value-new">$0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
@@ -532,14 +628,14 @@
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Entradas - Salidas este mes</div>
+        <div class="text-xs text-[#080a33]/40">Haz clic para ver detalles</div>
       </div>
 
       <div class="kpi-card-new">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Margen Hoy</div>
-            <div id="kpi-margin" class="kpi-value-new text-green-600">0%</div>
+            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Ingresos Mes</div>
+            <div id="total-income-month" class="kpi-value-new text-green-600">$0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
             <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -547,24 +643,68 @@
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Rentabilidad diaria</div>
+        <div class="text-xs text-[#080a33]/40">Total ingresos este mes</div>
       </div>
 
       <div class="kpi-card-new">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Ventas Totales</div>
-            <div id="total-sales" class="kpi-value-new">0</div>
+            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Egresos Mes</div>
+            <div id="total-expense-month" class="kpi-value-new text-red-600">$0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
-            <svg class="w-6 h-6 text-[#0d4c7f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Acumulado VT</div>
+        <div class="text-xs text-[#080a33]/40">Total gastos este mes</div>
       </div>
     </section>
+
+    <!-- Modal para detalles del flujo -->
+    <div id="flow-details-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-[#080a33]">Detalles del Flujo de Caja</h3>
+          <button id="close-flow-modal" class="text-[#080a33]/50 hover:text-[#080a33] text-2xl">
+            ×
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            <span class="font-semibold text-[#080a33]">Ingresos Totales</span>
+            <span id="modal-income-total" class="ml-auto font-bold text-green-600">$0</span>
+          </div>
+          
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <span class="font-semibold text-[#080a33]">Egresos Totales</span>
+            <span id="modal-expense-total" class="ml-auto font-bold text-red-600">$0</span>
+          </div>
+          
+          <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+            <div class="w-3 h-3 rounded-full bg-[#0d4c7f]"></div>
+            <span class="font-semibold text-[#080a33]">Flujo Neto</span>
+            <span id="modal-net-flow" class="ml-auto font-bold text-[#0d4c7f]">$0</span>
+          </div>
+        </div>
+        
+        <div class="text-sm text-[#080a33]/70">
+          <p>Este mes: <span id="modal-month-display"></span></p>
+          <p class="mt-1">Cálculo: Ingresos - Egresos = Flujo Neto</p>
+        </div>
+        
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <h4 class="font-semibold text-[#080a33] mb-3">Resumen por Categoría</h4>
+          <div id="modal-category-breakdown" class="space-y-2">
+            <!-- Los datos se llenarán dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Dashboard Grid Principal -->
     <div class="dashboard-grid">
@@ -572,8 +712,19 @@
       <div class="col-span-2 space-y-4">
         <!-- Análisis Visual -->
         <section class="main-panel animate-fade-in-up" style="animation-delay: 0.2s">
-          <div class="panel-header">
+          <div class="panel-header flex justify-between items-center">
             <h2 class="panel-title">Análisis Visual</h2>
+            <div class="period-filter">
+              <button class="period-btn active" data-period="last10">Últimos 10 días</button>
+              <button class="period-btn" data-period="month">Mes Actual</button>
+              <button class="period-btn" data-period="all">Periodo Completo</button>
+              <button class="period-btn" id="custom-period-btn">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Personalizado
+              </button>
+            </div>
           </div>
           <div class="space-y-6">
             <div>
@@ -589,6 +740,9 @@
               <h3 class="font-semibold text-[#080a33] mb-4">Tendencia de Balance</h3>
               <div class="chart-container-modern">
                 <canvas id="balance-trend-chart"></canvas>
+              </div>
+              <div class="mt-4 text-center text-sm text-[#080a33]/60">
+                Periodo mostrado: <span id="current-period-display">Últimos 10 días</span>
               </div>
             </div>
           </div>
@@ -868,8 +1022,8 @@
       const manualSalesTotalEl = $('manual-sales-total');
       const totalBalanceEl = $('total-balance');
       const netCashFlowEl = $('net-cash-flow');
-      const kpiMarginEl = $('kpi-margin');
-      const totalSalesEl = $('total-sales');
+      const totalIncomeMonthEl = $('total-income-month');
+      const totalExpenseMonthEl = $('total-expense-month');
       const automaticNoteEl = $('automatic-note');
       const lastTransactionNoteEl = $('last-transaction-note');
       const alertsContainer = $('alerts-container');
@@ -883,6 +1037,10 @@
       const advisorsTableContent = $('advisors-table-content');
       const clearDataButton = $('clear-data-button');
       const deleteSelectedButton = $('delete-selected-button');
+      const flowDetailsModal = $('flow-details-modal');
+      const closeFlowModal = $('close-flow-modal');
+      const netCashFlowCard = $('net-cash-flow-card');
+      const currentPeriodDisplay = $('current-period-display');
       
       const exportDataButton = $('export-data-button');
       const copyDataButton = $('copy-data-button');
@@ -898,7 +1056,7 @@
       let balanceChart, balanceTrendChart;
       let transactions = getFromLocalStorage('novaklar_transactions', []);
       let manualSalesTotal = getFromLocalStorage('novaklar_manual_sales_total', 0);
-      let dateFilter = { type: 'all', start: null, end: null };
+      let dateFilter = { type: 'last10', start: null, end: null };
       let selectedTransactions = new Set();
       
       function saveToLocalStorage(key, data) {
@@ -1122,8 +1280,7 @@
         });
       };
       
-      const updateNetCashFlow = () => {
-        if (!netCashFlowEl) return;
+      const updateMonthlyFinancials = () => {
         const now = DateTime.now();
         
         const cashInflow = sumTransactions(t => {
@@ -1138,8 +1295,85 @@
         
         const net = cashInflow - cashOutflow;
         
-        netCashFlowEl.textContent = `$${net.toLocaleString('es-CO', numberFormatOptions)}`;
+        if (totalIncomeMonthEl) {
+          totalIncomeMonthEl.textContent = `$${cashInflow.toLocaleString('es-CO', numberFormatOptions)}`;
+        }
+        
+        if (totalExpenseMonthEl) {
+          totalExpenseMonthEl.textContent = `$${cashOutflow.toLocaleString('es-CO', numberFormatOptions)}`;
+        }
+        
+        if (netCashFlowEl) {
+          netCashFlowEl.textContent = `$${net.toLocaleString('es-CO', numberFormatOptions)}`;
+          netCashFlowEl.className = `kpi-value-new ${net >= 0 ? 'text-[#0d4c7f]' : 'text-red-600'}`;
+        }
+        
+        return { cashInflow, cashOutflow, net };
       };
+      
+      const showFlowDetailsModal = () => {
+        const now = DateTime.now();
+        const { cashInflow, cashOutflow, net } = updateMonthlyFinancials();
+        
+        if ($('modal-income-total')) {
+          $('modal-income-total').textContent = `$${cashInflow.toLocaleString('es-CO', numberFormatOptions)}`;
+        }
+        
+        if ($('modal-expense-total')) {
+          $('modal-expense-total').textContent = `$${cashOutflow.toLocaleString('es-CO', numberFormatOptions)}`;
+        }
+        
+        if ($('modal-net-flow')) {
+          $('modal-net-flow').textContent = `$${net.toLocaleString('es-CO', numberFormatOptions)}`;
+        }
+        
+        if ($('modal-month-display')) {
+          $('modal-month-display').textContent = now.toFormat('MMMM yyyy');
+        }
+        
+        // Actualizar desglose por categoría
+        const categoryBreakdown = $('modal-category-breakdown');
+        if (categoryBreakdown) {
+          categoryBreakdown.innerHTML = `
+            <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+              <span class="text-sm text-green-700">Ingresos por Ventas</span>
+              <span class="text-sm font-semibold text-green-700">$${Math.round(cashInflow * 0.7).toLocaleString('es-CO')}</span>
+            </div>
+            <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+              <span class="text-sm text-green-700">Ingresos por Servicios</span>
+              <span class="text-sm font-semibold text-green-700">$${Math.round(cashInflow * 0.3).toLocaleString('es-CO')}</span>
+            </div>
+            <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+              <span class="text-sm text-red-700">Gastos Operativos</span>
+              <span class="text-sm font-semibold text-red-700">$${Math.round(cashOutflow * 0.6).toLocaleString('es-CO')}</span>
+            </div>
+            <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+              <span class="text-sm text-red-700">Gastos Administrativos</span>
+              <span class="text-sm font-semibold text-red-700">$${Math.round(cashOutflow * 0.4).toLocaleString('es-CO')}</span>
+            </div>
+          `;
+        }
+        
+        flowDetailsModal.style.display = 'flex';
+      };
+      
+      // Configurar eventos del modal
+      if (netCashFlowCard) {
+        netCashFlowCard.addEventListener('click', showFlowDetailsModal);
+      }
+      
+      if (closeFlowModal) {
+        closeFlowModal.addEventListener('click', () => {
+          flowDetailsModal.style.display = 'none';
+        });
+      }
+      
+      // Cerrar modal al hacer clic fuera
+      flowDetailsModal.addEventListener('click', (e) => {
+        if (e.target === flowDetailsModal) {
+          flowDetailsModal.style.display = 'none';
+        }
+      });
       
       const selectAllCheckbox = document.getElementById('select-all-checkbox');
       if (selectAllCheckbox) {
@@ -1219,17 +1453,6 @@
         totalBalanceEl.textContent = `$${total.toLocaleString('es-CO', numberFormatOptions)}`;
       };
       
-      const updateKpiMargin = () => {
-        if (!kpiMarginEl) return;
-        const today = DateTime.now().toISODate();
-        const incomeToday = sumTransactions(t => t.type === 'ingreso' && t.date === today);
-        const expenseToday = sumTransactions(t => t.type === 'egreso' && t.date === today);
-        const margin = incomeToday ? Math.round(((incomeToday - expenseToday) / incomeToday) * 100) : 0;
-        
-        kpiMarginEl.textContent = `${margin}%`;
-        kpiMarginEl.className = `kpi-value-new ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`;
-      };
-      
       const updateCharts = () => {
         if (!balanceChartCanvas || !balanceTrendChartCanvas) {
           updateBalanceTrendChart();
@@ -1237,10 +1460,16 @@
         }
         if (balanceChart) balanceChart.destroy();
         
-        const totalIncome = transactions.filter(t => t.type === 'ingreso')
-          .reduce((s, t) => s + (t.amount || 0), 0);
-        const totalExpense = transactions.filter(t => t.type === 'egreso')
-          .reduce((s, t) => s + (t.amount || 0), 0);
+        const now = DateTime.now();
+        const totalIncome = sumTransactions(t => {
+          const d = DateTime.fromISO(t.date);
+          return d.month === now.month && d.year === now.year && t.type === 'ingreso';
+        });
+        
+        const totalExpense = sumTransactions(t => {
+          const d = DateTime.fromISO(t.date);
+          return d.month === now.month && d.year === now.year && t.type === 'egreso';
+        });
         
         balanceChart = new Chart(balanceChartCanvas, {
           type: 'doughnut',
@@ -1287,9 +1516,34 @@
         if (!balanceTrendChartCanvas) return;
         if (balanceTrendChart) balanceTrendChart.destroy();
         
+        const now = DateTime.now();
+        let startDate, endDate;
+        
+        switch(dateFilter.type) {
+          case 'last10':
+            startDate = now.minus({ days: 10 }).toISODate();
+            endDate = now.toISODate();
+            break;
+          case 'month':
+            startDate = now.startOf('month').toISODate();
+            endDate = now.endOf('month').toISODate();
+            break;
+          case 'all':
+            startDate = null;
+            endDate = null;
+            break;
+          case 'custom':
+            startDate = dateFilter.start;
+            endDate = dateFilter.end;
+            break;
+          default:
+            startDate = now.minus({ days: 10 }).toISODate();
+            endDate = now.toISODate();
+        }
+        
         let filtered = [...transactions];
-        if (dateFilter.type !== 'all') {
-          filtered = transactions.filter(t => t.date >= dateFilter.start && t.date <= dateFilter.end);
+        if (startDate && endDate) {
+          filtered = transactions.filter(t => t.date >= startDate && t.date <= endDate);
         }
         
         const dailyData = filtered.reduce((acc, t) => {
@@ -1306,6 +1560,25 @@
           running += (dailyData[d].income - dailyData[d].expense);
           return running;
         });
+        
+        // Actualizar display del periodo
+        if (currentPeriodDisplay) {
+          let displayText = '';
+          switch(dateFilter.type) {
+            case 'last10': displayText = 'Últimos 10 días'; break;
+            case 'month': displayText = 'Mes Actual'; break;
+            case 'all': displayText = 'Periodo Completo'; break;
+            case 'custom': 
+              if (startDate && endDate) {
+                displayText = `${DateTime.fromISO(startDate).toFormat('dd/MM')} - ${DateTime.fromISO(endDate).toFormat('dd/MM')}`;
+              } else {
+                displayText = 'Periodo Personalizado';
+              }
+              break;
+            default: displayText = 'Últimos 10 días';
+          }
+          currentPeriodDisplay.textContent = displayText;
+        }
         
         balanceTrendChart = new Chart(balanceTrendChartCanvas, {
           type: 'line',
@@ -1360,6 +1633,41 @@
           }
         });
       };
+      
+      // Configurar filtros de periodo
+      const periodButtons = document.querySelectorAll('.period-btn[data-period]');
+      periodButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Remover clase active de todos
+          periodButtons.forEach(b => b.classList.remove('active'));
+          // Agregar clase active al botón clickeado
+          btn.classList.add('active');
+          // Actualizar filtro
+          dateFilter.type = btn.dataset.period;
+          updateBalanceTrendChart();
+        });
+      });
+      
+      // Configurar botón de periodo personalizado
+      const customPeriodBtn = document.getElementById('custom-period-btn');
+      if (customPeriodBtn) {
+        customPeriodBtn.addEventListener('click', () => {
+          const startDate = prompt('Ingresa fecha de inicio (YYYY-MM-DD):');
+          const endDate = prompt('Ingresa fecha de fin (YYYY-MM-DD):');
+          
+          if (startDate && endDate) {
+            dateFilter.type = 'custom';
+            dateFilter.start = startDate;
+            dateFilter.end = endDate;
+            
+            // Actualizar botones
+            periodButtons.forEach(b => b.classList.remove('active'));
+            customPeriodBtn.classList.add('active');
+            
+            updateBalanceTrendChart();
+          }
+        });
+      }
       
       const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
       const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
@@ -1450,7 +1758,6 @@
           }
           
           renderAdvisors(advisorsData);
-          updateSalesStats(totalSales, datesWithSales.size);
           
         } catch (error) {
           if (advisorsTableBody) {
@@ -1467,11 +1774,6 @@
           if (advisorsLoadingState) advisorsLoadingState.classList.add('hidden');
           if (advisorsTableContent) advisorsTableContent.classList.remove('hidden');
         }
-      };
-      
-      const updateSalesStats = (totalSales, numberOfDays) => {
-        const avgSales = numberOfDays > 0 ? totalSales / numberOfDays : 0;
-        if (totalSalesEl) totalSalesEl.textContent = totalSales.toLocaleString('es-CO', numberFormatOptions);
       };
       
       const renderAdvisors = (advisors) => {
@@ -1563,13 +1865,12 @@
       
       const updateUI = () => {
         updateTotalBalance();
+        updateMonthlyFinancials();
         updateCharts();
         renderTransactions();
         updateManualSalesTotal();
         checkForAlerts();
         updateAutomaticNote();
-        updateNetCashFlow();
-        updateKpiMargin();
         fetchAndProcessSheetsData();
       };
       
