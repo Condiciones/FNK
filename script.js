@@ -21,12 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const ADVISOR_COLUMN_INDEX = 11;
   const UPDATE_INTERVAL = 5 * 60 * 1000;
   
-  const advisorColors = ['#0d4c7f', '#7fcfda', '#08355c'];
-  const incomeExpenseColors = ['#0d4c7f', '#7fcfda'];
+  const advisorColors = ['#106b63', '#eec55b', '#000000'];
+  const incomeExpenseColors = ['#106b63', '#ef4444'];
   
   const $ = id => document.getElementById(id);
   const transactionForm = $('transaction-form');
+  const transactionTypeSelect = $('transaction-type');
+  const transactionCompanyContainer = $('transaction-company-container');
+  const transactionCompanySelect = $('transaction-company');
   const manualSalesForm = $('manual-sales-form');
+  const advisorForm = $('advisor-form');
   const manualSalesTotalEl = $('manual-sales-total');
   const totalBalanceEl = $('total-balance');
   const netCashFlowEl = $('net-cash-flow');
@@ -50,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const netCashFlowCard = $('net-cash-flow-card');
   const currentPeriodDisplay = $('current-period-display');
   const chartPeriodBadge = $('chart-period-badge');
+  const advisorsList = $('advisors-list');
   
   const exportDataButton = $('export-data-button');
   const copyDataButton = $('copy-data-button');
@@ -63,8 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const copySuccess = $('copy-success');
   
   let balanceChart, balanceTrendChart;
-  let transactions = getFromLocalStorage('novaklar_transactions', []);
-  let manualSalesTotal = getFromLocalStorage('novaklar_manual_sales_total', 0);
+  let transactions = getFromLocalStorage('nova_transactions', []);
+  let manualSalesTotal = getFromLocalStorage('nova_manual_sales_total', 0);
+  let createdAdvisors = getFromLocalStorage('nova_created_advisors', []);
+  let sheetRawData = null;
   let dateFilter = { type: 'last10', start: null, end: null };
   let selectedTransactions = new Set();
   let totalMonthSales = 0;
@@ -88,14 +95,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   const generateUniqueId = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
+  const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
+  const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
+  
+  // ==================== TRANSACTION TYPE SELECTOR ====================
+  
+  transactionTypeSelect?.addEventListener('change', (e) => {
+    const type = e.target.value;
+    if (type === 'ingreso' || type === 'egreso') {
+      transactionCompanyContainer.classList.remove('hidden');
+    } else {
+      transactionCompanyContainer.classList.add('hidden');
+      transactionCompanySelect.value = '';
+    }
+  });
   
   const getLocalDataForExport = () => JSON.stringify({
     transactions,
     manualSalesTotal,
+    createdAdvisors,
     exportDate: DateTime.now().toISO(),
-    version: "2.0",
-    note: "Datos locales de Novaklar Finanzas"
+    version: "3.0",
+    note: "Datos locales de Nova Finanzas"
   }, null, 2);
+  
+  // ==================== EXPORT/IMPORT ====================
   
   copyDataButton?.addEventListener('click', async () => {
     try {
@@ -115,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `novaklar_datos_${DateTime.now().toFormat('yyyy-MM-dd_HH-mm-ss')}.json`;
+    link.download = `nova_datos_${DateTime.now().toFormat('yyyy-MM-dd_HH-mm-ss')}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -165,18 +189,225 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (importedData.transactions && Array.isArray(importedData.transactions)) {
       transactions = importedData.transactions;
-      saveToLocalStorage('novaklar_transactions', transactions);
+      saveToLocalStorage('nova_transactions', transactions);
     }
     
     if (importedData.manualSalesTotal !== undefined) {
       manualSalesTotal = importedData.manualSalesTotal;
-      saveToLocalStorage('novaklar_manual_sales_total', manualSalesTotal);
+      saveToLocalStorage('nova_manual_sales_total', manualSalesTotal);
+    }
+
+    if (importedData.createdAdvisors && Array.isArray(importedData.createdAdvisors)) {
+      createdAdvisors = importedData.createdAdvisors;
+      saveToLocalStorage('nova_created_advisors', createdAdvisors);
     }
     
     if (importDataFile) importDataFile.value = '';
     updateUI();
     alert('Datos locales cargados exitosamente.');
   }
+  
+  // ==================== ADVISORS MANAGEMENT ====================
+  
+  const renderAdvisorsList = () => {
+    if (!advisorsList) return;
+    if (createdAdvisors.length === 0) {
+      advisorsList.innerHTML = '<p class="text-sm text-[#000000]/60 text-center py-2">Sin asesores creados</p>';
+      return;
+    }
+    advisorsList.innerHTML = createdAdvisors.map(advisor => `
+      <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+        <div>
+          <p class="text-sm font-medium text-[#000000]">${advisor.name}</p>
+          <p class="text-xs text-[#000000]/50">${advisor.company}</p>
+        </div>
+        <button onclick="window.deleteAdvisor('${advisor.id}')" class="text-red-500 hover:text-red-700 text-sm font-bold">
+          ✕
+        </button>
+      </div>
+    `).join('');
+  };
+
+  window.deleteAdvisor = (advisorId) => {
+    if (!confirm('¿Eliminar este asesor?')) return;
+    createdAdvisors = createdAdvisors.filter(a => a.id !== advisorId);
+    saveToLocalStorage('nova_created_advisors', createdAdvisors);
+    renderAdvisorsList();
+    updateAdvisorsPerformance();
+  };
+
+  advisorForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('advisor-name').value.trim();
+    const company = $('advisor-company').value;
+
+    if (!name || !company) {
+      alert('Por favor completa todos los campos');
+      return;
+    }
+
+    const newAdvisor = {
+      id: generateUniqueId(),
+      name: name.charAt(0).toUpperCase() + name.slice(1).toLowerCase(),
+      company: company
+    };
+
+    createdAdvisors.push(newAdvisor);
+    saveToLocalStorage('nova_created_advisors', createdAdvisors);
+    advisorForm.reset();
+    renderAdvisorsList();
+    updateAdvisorsPerformance();
+  });
+  
+  // ==================== FETCH GOOGLE SHEETS DATA ====================
+  
+  const fetchAndProcessSheetsData = async () => {
+    try {
+      const cacheBuster = Date.now();
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&range=A:L&t=${cacheBuster}`;
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`${resp.status}: ${resp.statusText}`);
+      
+      const text = await resp.text();
+      
+      const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+      if (!match || !match[1]) throw new Error('Respuesta inesperada');
+      
+      const data = JSON.parse(match[1]);
+      
+      if (!data.table || !data.table.rows) throw new Error('Estructura de datos inesperada');
+      
+      sheetRawData = data.table.rows;
+      
+      totalMonthSales = 0;
+      sheetRawData.forEach(row => {
+        if (!row.c) return;
+        for (let i = SALES_COLUMN_START; i <= SALES_COLUMN_END; i++) {
+          if (row.c[i]) {
+            const cell = row.c[i];
+            const value = (cell.v !== null && cell.v !== undefined) ? cell.v : (cell.f || 0);
+            totalMonthSales += parseSalesValue(value);
+          }
+        }
+      });
+      
+      updateAdvisorsPerformance();
+      updateMonthSalesMetrics();
+      
+    } catch (error) {
+      console.error('Error al cargar Sheets:', error);
+      if (advisorsTableBody) {
+        advisorsTableBody.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center p-4 text-red-500 text-sm">
+              ⚠️ Error al cargar Google Sheets
+            </td>
+          </tr>
+        `;
+      }
+    }
+  };
+  
+  const getAdvisorSalesFromSheet = (advisorName) => {
+    if (!sheetRawData || sheetRawData.length === 0) return 0;
+    
+    const normalized = normalizeName(advisorName);
+    let totalSales = 0;
+    
+    sheetRawData.forEach(row => {
+      if (!row.c) return;
+      
+      const advisorCell = row.c[ADVISOR_COLUMN_INDEX];
+      if (advisorCell && advisorCell.v !== null && advisorCell.v !== undefined) {
+        const sheetAdvisorName = String(advisorCell.v).trim();
+        const sheetNormalized = normalizeName(sheetAdvisorName);
+        
+        if (sheetNormalized === normalized) {
+          for (let i = SALES_COLUMN_START; i <= SALES_COLUMN_END; i++) {
+            if (row.c[i]) {
+              const cell = row.c[i];
+              const value = (cell.v !== null && cell.v !== undefined) ? cell.v : (cell.f || 0);
+              totalSales += parseSalesValue(value);
+            }
+          }
+        }
+      }
+    });
+    
+    return totalSales;
+  };
+  
+  const renderAdvisors = (advisors) => {
+    if (!advisorsTableBody) return;
+    advisorsTableBody.innerHTML = '';
+    
+    const sorted = advisors.sort((a, b) => b.sales - a.sales);
+    const totalSales = sorted.reduce((sum, a) => sum + a.sales, 0);
+    
+    sorted.forEach((a, index) => {
+      const percentage = totalSales > 0 ? ((a.sales / totalSales) * 100).toFixed(1) : 0;
+      
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="font-medium flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full" style="background-color: ${advisorColors[index % advisorColors.length]}"></div>
+          ${a.name}
+        </td>
+        <td class="text-right font-semibold">${a.sales.toLocaleString('es-CO')}</td>
+        <td class="text-right">
+          <span class="text-[#000000]/50">${percentage}%</span>
+        </td>
+      `;
+      advisorsTableBody.appendChild(row);
+    });
+  };
+  
+  const updateAdvisorsPerformance = () => {
+    if (advisorsLoadingState) advisorsLoadingState.classList.remove('hidden');
+    if (advisorsTableContent) advisorsTableContent.classList.add('hidden');
+    
+    try {
+      if (createdAdvisors.length === 0) {
+        advisorsTableBody.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center p-4 text-[#000000]/50">
+              📝 Registra asesores para ver su desempeño
+            </td>
+          </tr>
+        `;
+      } else {
+        const advisorsList = createdAdvisors.map(advisor => ({
+          name: advisor.name,
+          company: advisor.company,
+          sales: getAdvisorSalesFromSheet(advisor.name)
+        })).filter(a => a.sales > 0);
+        
+        if (advisorsList.length === 0) {
+          advisorsTableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="text-center p-4 text-[#000000]/50">
+                ⏳ Los asesores no tienen ventas registradas
+              </td>
+            </tr>
+          `;
+        } else {
+          renderAdvisors(advisorsList);
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      advisorsTableBody.innerHTML = `
+        <tr>
+          <td colspan="3" class="text-center p-4 text-red-500 text-sm">
+            ⚠️ Error al procesar datos
+          </td>
+        </tr>
+      `;
+    } finally {
+      if (advisorsLoadingState) advisorsLoadingState.classList.add('hidden');
+      if (advisorsTableContent) advisorsTableContent.classList.remove('hidden');
+    }
+  };
   
   const updateManualSalesTotal = () => {
     if (manualSalesTotalEl) manualSalesTotalEl.textContent = manualSalesTotal.toLocaleString('es-CO', numberFormatOptions);
@@ -185,8 +416,41 @@ document.addEventListener('DOMContentLoaded', () => {
   function sumTransactions(predicate) {
     return transactions.filter(predicate).reduce((s, t) => s + (t.amount || 0), 0);
   }
+
+  // ==================== NUEVA FUNCIÓN: OBTENER DATOS SEPARADOS POR USUARIO ====================
   
-  // Función para obtener transacciones filtradas por periodo
+  const getCashFlowByUser = (month, year) => {
+    const novaklar = {
+      income: 0,
+      expense: 0,
+      conversion: 0
+    };
+    
+    const hanabi = {
+      income: 0,
+      expense: 0,
+      conversion: 0
+    };
+    
+    transactions.forEach(t => {
+      const tDate = DateTime.fromISO(t.date);
+      
+      if (tDate.month === month && tDate.year === year) {
+        const user = t.company === 'hanabi' ? hanabi : novaklar;
+        
+        if (t.type === 'ingreso') {
+          user.income += t.amount || 0;
+        } else if (t.type === 'egreso') {
+          user.expense += t.amount || 0;
+        } else if (t.type === 'conversion') {
+          user.conversion += t.amount || 0;
+        }
+      }
+    });
+    
+    return { novaklar, hanabi };
+  };
+  
   function getFilteredTransactions() {
     const now = DateTime.now();
     let startDate, endDate;
@@ -201,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
         endDate = now.endOf('month').toISODate();
         break;
       case 'all':
-        return transactions; // Devolver todas sin filtrar
+        return transactions;
       case 'custom':
         startDate = dateFilter.start;
         endDate = dateFilter.end;
@@ -232,37 +496,45 @@ document.addEventListener('DOMContentLoaded', () => {
       const d = DateTime.fromISO(t.date);
       return d.month === now.month && d.year === now.year && t.type === 'egreso';
     });
+
+    const currentMonthConversion = sumTransactions(t => {
+      const d = DateTime.fromISO(t.date);
+      return d.month === now.month && d.year === now.year && t.type === 'conversion';
+    });
     
     const alerts = [];
+
+    if (currentMonthIncome > 0) {
+      alerts.push({
+        type: 'success',
+        message: `💰 La empresa ha generado $${currentMonthIncome.toLocaleString('es-CO')} en ingresos este mes.`
+      });
+    }
+
+    if (currentMonthExpense > 0) {
+      alerts.push({
+        type: 'warning',
+        message: `💸 Se ha gastado $${currentMonthExpense.toLocaleString('es-CO')} en egresos este mes.`
+      });
+    }
+
+    if (currentMonthConversion > 0) {
+      alerts.push({
+        type: 'info',
+        message: `🔄 Se ha convertido $${currentMonthConversion.toLocaleString('es-CO')} a dinero personal del CEO.`
+      });
+    }
     
     if (currentMonthExpense > currentMonthIncome) {
       alerts.push({
         type: 'warning',
-        message: `Los egresos ($${currentMonthExpense.toLocaleString('es-CO')}) superan los ingresos ($${currentMonthIncome.toLocaleString('es-CO')}) este mes.`
-      });
-    }
-    
-    const today = now.toISODate();
-    const todaySales = sumTransactions(t => t.date === today && t.type === 'ingreso');
-    const avgDailySales = currentMonthIncome / Math.max(1, now.day);
-    
-    if (todaySales > avgDailySales * 1.5) {
-      alerts.push({
-        type: 'success',
-        message: `¡Excelente día! Ventas de hoy: $${todaySales.toLocaleString('es-CO')} (supera el promedio)`
-      });
-    }
-    
-    if (todaySales === 0) {
-      alerts.push({
-        type: 'info',
-        message: 'No hay transacciones registradas para hoy.'
+        message: `⚠️ Los egresos superan los ingresos este mes.`
       });
     }
     
     if (!alerts.length) {
       alertsContainer.innerHTML = `
-        <div class="text-center py-8 text-[#080a33]/50">
+        <div class="text-center py-8 text-[#000000]/50">
           <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
@@ -295,7 +567,8 @@ document.addEventListener('DOMContentLoaded', () => {
     automaticNoteEl.textContent = `Sistema actualizado: ${now.toLocaleString(DateTime.TIME_SIMPLE)}`;
     
     const lastDate = DateTime.fromISO(lastTransaction.date).toLocaleString(DateTime.DATE_FULL);
-    lastTransactionNoteEl.textContent = `Última transacción: ${lastTransaction.type === 'ingreso' ? 'Ingreso' : 'Egreso'} de $${(lastTransaction.amount || 0).toLocaleString('es-CO')} el ${lastDate}`;
+    const typeText = lastTransaction.type === 'ingreso' ? 'Ingreso' : (lastTransaction.type === 'egreso' ? 'Egreso' : 'Conversión');
+    lastTransactionNoteEl.textContent = `Última transacción: ${typeText} de $${(lastTransaction.amount || 0).toLocaleString('es-CO')} el ${lastDate}`;
   };
   
   const toggleDeleteButton = () => {
@@ -316,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!confirm(`¿Eliminar ${selectedTransactions.size} transacción(es)?`)) return;
       
       transactions = transactions.filter(t => !selectedTransactions.has(t.id));
-      saveToLocalStorage('novaklar_transactions', transactions);
+      saveToLocalStorage('nova_transactions', transactions);
       selectedTransactions.clear();
       toggleDeleteButton();
       updateUI();
@@ -335,24 +608,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const d = DateTime.fromISO(t.date);
       return d.month === now.month && d.year === now.year && t.type === 'egreso';
     });
+
+    const cashConversion = sumTransactions(t => {
+      const d = DateTime.fromISO(t.date);
+      return d.month === now.month && d.year === now.year && t.type === 'conversion';
+    });
     
     const net = cashInflow - cashOutflow;
     
-    // Actualizar métricas de ventas del mes
     updateMonthSalesMetrics();
     
     if (netCashFlowEl) {
       netCashFlowEl.textContent = `$${net.toLocaleString('es-CO', numberFormatOptions)}`;
-      netCashFlowEl.className = `kpi-value-new ${net >= 0 ? 'text-[#0d4c7f]' : 'text-red-600'}`;
+      netCashFlowEl.className = `kpi-value-new ${net >= 0 ? 'text-[#106b63]' : 'text-red-600'}`;
     }
     
-    return { cashInflow, cashOutflow, net };
+    return { cashInflow, cashOutflow, cashConversion, net };
   };
   
   const updateMonthSalesMetrics = () => {
     const now = DateTime.now();
     
-    // Usamos las ventas del Google Sheets
     if (totalSalesMonthEl) {
       totalSalesMonthEl.textContent = totalMonthSales.toLocaleString('es-CO', numberFormatOptions);
     }
@@ -364,9 +640,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
+  // ==================== MODAL CON DESGLOSE POR USUARIO ====================
+  
   const showFlowDetailsModal = () => {
     const now = DateTime.now();
-    const { cashInflow, cashOutflow, net } = updateMonthlyFinancials();
+    const { cashInflow, cashOutflow, cashConversion, net } = updateMonthlyFinancials();
+    const { novaklar, hanabi } = getCashFlowByUser(now.month, now.year);
     
     if ($('modal-income-total')) {
       $('modal-income-total').textContent = `$${cashInflow.toLocaleString('es-CO', numberFormatOptions)}`;
@@ -374,6 +653,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if ($('modal-expense-total')) {
       $('modal-expense-total').textContent = `$${cashOutflow.toLocaleString('es-CO', numberFormatOptions)}`;
+    }
+
+    if ($('modal-conversion-total')) {
+      $('modal-conversion-total').textContent = `$${cashConversion.toLocaleString('es-CO', numberFormatOptions)}`;
     }
     
     if ($('modal-net-flow')) {
@@ -384,25 +667,70 @@ document.addEventListener('DOMContentLoaded', () => {
       $('modal-month-display').textContent = now.toFormat('MMMM yyyy');
     }
     
-    // Actualizar desglose por categoría
     const categoryBreakdown = $('modal-category-breakdown');
     if (categoryBreakdown) {
       categoryBreakdown.innerHTML = `
-        <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-          <span class="text-sm text-green-700">Ingresos por Ventas</span>
-          <span class="text-sm font-semibold text-green-700">$${Math.round(cashInflow * 0.7).toLocaleString('es-CO')}</span>
+        <!-- RESUMEN GENERAL -->
+        <div class="mb-6 pb-4 border-b border-gray-200">
+          <h5 class="font-bold text-[#000000] text-sm uppercase tracking-wider mb-3">Resumen General del Mes</h5>
+          <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg mb-2">
+            <span class="text-sm text-green-700">Ingresos Totales</span>
+            <span class="text-sm font-semibold text-green-700">$${cashInflow.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg mb-2">
+            <span class="text-sm text-red-700">Egresos Totales</span>
+            <span class="text-sm font-semibold text-red-700">$${cashOutflow.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="flex items-center justify-between p-2 bg-yellow-50 rounded-lg" style="border-left: 4px solid #eec55b">
+            <span class="text-sm text-yellow-700">Conversiones</span>
+            <span class="text-sm font-semibold text-yellow-700">$${cashConversion.toLocaleString('es-CO')}</span>
+          </div>
         </div>
-        <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-          <span class="text-sm text-green-700">Ingresos por Servicios</span>
-          <span class="text-sm font-semibold text-green-700">$${Math.round(cashInflow * 0.3).toLocaleString('es-CO')}</span>
+
+        <!-- NOVAKLAR -->
+        <div class="user-breakdown-section mb-4">
+          <div class="user-breakdown-header">👤 Novaklar</div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Ingresos</span>
+            <span class="breakdown-value text-green-600">$${novaklar.income.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Egresos</span>
+            <span class="breakdown-value text-red-600">$${novaklar.expense.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Conversiones</span>
+            <span class="breakdown-value text-yellow-600">$${novaklar.conversion.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="breakdown-item border-t pt-2">
+            <span class="breakdown-label font-semibold">Flujo Neto</span>
+            <span class="breakdown-value ${(novaklar.income - novaklar.expense) >= 0 ? 'text-green-600' : 'text-red-600'}">
+              $${(novaklar.income - novaklar.expense).toLocaleString('es-CO')}
+            </span>
+          </div>
         </div>
-        <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
-          <span class="text-sm text-red-700">Gastos Operativos</span>
-          <span class="text-sm font-semibold text-red-700">$${Math.round(cashOutflow * 0.6).toLocaleString('es-CO')}</span>
-        </div>
-        <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
-          <span class="text-sm text-red-700">Gastos Administrativos</span>
-          <span class="text-sm font-semibold text-red-700">$${Math.round(cashOutflow * 0.4).toLocaleString('es-CO')}</span>
+
+        <!-- HANABI -->
+        <div class="user-breakdown-section">
+          <div class="user-breakdown-header">👤 Hanabi</div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Ingresos</span>
+            <span class="breakdown-value text-green-600">$${hanabi.income.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Egresos</span>
+            <span class="breakdown-value text-red-600">$${hanabi.expense.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Conversiones</span>
+            <span class="breakdown-value text-yellow-600">$${hanabi.conversion.toLocaleString('es-CO')}</span>
+          </div>
+          <div class="breakdown-item border-t pt-2">
+            <span class="breakdown-label font-semibold">Flujo Neto</span>
+            <span class="breakdown-value ${(hanabi.income - hanabi.expense) >= 0 ? 'text-green-600' : 'text-red-600'}">
+              $${(hanabi.income - hanabi.expense).toLocaleString('es-CO')}
+            </span>
+          </div>
         </div>
       `;
     }
@@ -410,7 +738,6 @@ document.addEventListener('DOMContentLoaded', () => {
     flowDetailsModal.style.display = 'flex';
   };
   
-  // Configurar eventos del modal
   if (netCashFlowCard) {
     netCashFlowCard.addEventListener('click', showFlowDetailsModal);
   }
@@ -421,7 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Cerrar modal al hacer clic fuera
   flowDetailsModal.addEventListener('click', (e) => {
     if (e.target === flowDetailsModal) {
       flowDetailsModal.style.display = 'none';
@@ -454,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.className = 'transaction-checkbox rounded border-gray-300 hover:border-[#7fcfda]';
+      checkbox.className = 'transaction-checkbox rounded border-gray-300 hover:border-[#106b63]';
       checkbox.dataset.id = t.id;
       checkbox.addEventListener('change', (e) => {
         if (e.target.checked) selectedTransactions.add(t.id);
@@ -471,26 +797,44 @@ document.addEventListener('DOMContentLoaded', () => {
       dateCell.textContent = dateObj.toFormat('dd/MM/yyyy');
       
       const typeCell = document.createElement('td');
+      let statusClass = 'status-income';
+      let typeText = 'Ingreso';
+      
+      if (t.type === 'egreso') {
+        statusClass = 'status-expense';
+        typeText = 'Egreso';
+      } else if (t.type === 'conversion') {
+        statusClass = 'status-conversion';
+        typeText = 'Conversión';
+      }
+
       typeCell.innerHTML = `
-        <span class="status-indicator ${t.type === 'ingreso' ? 'status-income' : 'status-expense'}">
-          ${t.type === 'ingreso' ? 'Ingreso' : 'Egreso'}
+        <span class="status-indicator ${statusClass}">
+          ${typeText}
         </span>
       `;
+
+      const companyCell = document.createElement('td');
+      companyCell.textContent = t.company ? (t.company === 'novaklar' ? 'Novaklar' : 'Hanabi') : '-';
+      companyCell.className = 'text-[#000000]/70 text-sm';
       
       const amountCell = document.createElement('td');
       amountCell.className = 'text-right font-semibold';
       amountCell.textContent = `$${(t.amount || 0).toLocaleString('es-CO', numberFormatOptions)}`;
-      amountCell.classList.add(t.type === 'ingreso' ? 'text-green-600' : 'text-red-600');
       
-      const descCell = document.createElement('td');
-      descCell.textContent = t.description || 'Sin descripción';
-      descCell.className = 'text-[#080a33]/50 text-sm';
+      if (t.type === 'ingreso') {
+        amountCell.classList.add('text-green-600');
+      } else if (t.type === 'egreso') {
+        amountCell.classList.add('text-red-600');
+      } else {
+        amountCell.classList.add('text-yellow-600');
+      }
       
       row.appendChild(checkboxCell);
       row.appendChild(dateCell);
       row.appendChild(typeCell);
+      row.appendChild(companyCell);
       row.appendChild(amountCell);
-      row.appendChild(descCell);
       
       transactionHistoryBody.appendChild(row);
     });
@@ -500,8 +844,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const updateTotalBalance = () => {
     if (!totalBalanceEl) return;
-    const total = transactions.reduce((sum, t) => 
-      t.type === 'ingreso' ? sum + (t.amount || 0) : sum - (t.amount || 0), 0);
+    const total = transactions.reduce((sum, t) => {
+      if (t.type === 'conversion') return sum;
+      return t.type === 'ingreso' ? sum + (t.amount || 0) : sum - (t.amount || 0);
+    }, 0);
     
     totalBalanceEl.textContent = `$${total.toLocaleString('es-CO', numberFormatOptions)}`;
   };
@@ -513,7 +859,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (balanceChart) balanceChart.destroy();
     
-    // Usar transacciones filtradas para ambas gráficas
     const filteredTransactions = getFilteredTransactions();
     
     const totalIncome = filteredTransactions
@@ -524,7 +869,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .filter(t => t.type === 'egreso')
       .reduce((s, t) => s + (t.amount || 0), 0);
     
-    // Actualizar badge del periodo
     if (chartPeriodBadge) {
       let periodText = '';
       switch(dateFilter.type) {
@@ -537,7 +881,6 @@ document.addEventListener('DOMContentLoaded', () => {
       chartPeriodBadge.textContent = periodText;
     }
     
-    // Solo crear la gráfica si hay datos
     if (totalIncome > 0 || totalExpense > 0) {
       balanceChart = new Chart(balanceChartCanvas, {
         type: 'doughnut',
@@ -577,7 +920,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     } else {
-      // Mostrar gráfica vacía si no hay datos
       balanceChart = new Chart(balanceChartCanvas, {
         type: 'doughnut',
         data: {
@@ -616,7 +958,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const dt = t.date;
       if (!acc[dt]) acc[dt] = { income: 0, expense: 0 };
       if (t.type === 'ingreso') acc[dt].income += t.amount || 0;
-      else acc[dt].expense += t.amount || 0;
+      else if (t.type === 'egreso') acc[dt].expense += t.amount || 0;
       return acc;
     }, {});
     
@@ -627,7 +969,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return running;
     });
     
-    // Actualizar display del periodo
     if (currentPeriodDisplay) {
       let displayText = '';
       switch(dateFilter.type) {
@@ -646,7 +987,6 @@ document.addEventListener('DOMContentLoaded', () => {
       currentPeriodDisplay.textContent = displayText;
     }
     
-    // Solo crear la gráfica si hay datos
     if (sortedDates.length > 0) {
       balanceTrendChart = new Chart(balanceTrendChartCanvas, {
         type: 'line',
@@ -655,12 +995,12 @@ document.addEventListener('DOMContentLoaded', () => {
           datasets: [{
             label: 'Balance Acumulado',
             data: dailyBalances,
-            borderColor: '#0d4c7f',
-            backgroundColor: 'rgba(13, 76, 127, 0.08)',
+            borderColor: '#106b63',
+            backgroundColor: 'rgba(16, 107, 99, 0.08)',
             borderWidth: 2,
             tension: 0.1,
             fill: true,
-            pointBackgroundColor: '#0d4c7f',
+            pointBackgroundColor: '#106b63',
             pointRadius: 3,
             pointHoverRadius: 6
           }]
@@ -701,7 +1041,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     } else {
-      // Mostrar gráfica vacía si no hay datos
       balanceTrendChart = new Chart(balanceTrendChartCanvas, {
         type: 'line',
         data: {
@@ -748,21 +1087,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // Configurar filtros de periodo
   const periodButtons = document.querySelectorAll('.period-btn[data-period]');
   periodButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      // Remover clase active de todos
       periodButtons.forEach(b => b.classList.remove('active'));
-      // Agregar clase active al botón clickeado
       btn.classList.add('active');
-      // Actualizar filtro
       dateFilter.type = btn.dataset.period;
-      updateCharts(); // Actualizar ambas gráficas
+      updateCharts();
     });
   });
   
-  // Configurar botón de periodo personalizado
   const customPeriodBtn = document.getElementById('custom-period-btn');
   if (customPeriodBtn) {
     customPeriodBtn.addEventListener('click', () => {
@@ -774,161 +1108,36 @@ document.addEventListener('DOMContentLoaded', () => {
         dateFilter.start = startDate;
         dateFilter.end = endDate;
         
-        // Actualizar botones
         periodButtons.forEach(b => b.classList.remove('active'));
         customPeriodBtn.classList.add('active');
         
-        updateCharts(); // Actualizar ambas gráficas
+        updateCharts();
       }
     });
   }
   
-  const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
-  const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
-  
-  const fetchAndProcessSheetsData = async () => {
-    if (advisorsLoadingState) advisorsLoadingState.classList.remove('hidden');
-    if (advisorsTableContent) advisorsTableContent.classList.add('hidden');
-    
-    try {
-      const cacheBuster = Date.now();
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&range=A:L&t=${cacheBuster}`;
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`${resp.status}: ${resp.statusText}`);
-      
-      const text = await resp.text();
-      
-      const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
-      if (!match || !match[1]) throw new Error('Respuesta inesperada al consultar Google Sheets');
-      
-      const data = JSON.parse(match[1]);
-      
-      if (!data.table || !data.table.rows) throw new Error('Estructura de datos inesperada');
-      
-      totalMonthSales = 0;
-      const advisorsMap = new Map();
-      let datesWithSales = new Set();
-      
-      const predefinedAdvisors = ['alejandra', 'tatiana', 'danna'];
-      
-      predefinedAdvisors.forEach(advisor => {
-        advisorsMap.set(advisor, { 
-          name: advisor.charAt(0).toUpperCase() + advisor.slice(1), 
-          sales: 0 
-        });
-      });
-      
-      data.table.rows.forEach(row => {
-        if (!row.c) return;
-        
-        const advisorCell = row.c[ADVISOR_COLUMN_INDEX];
-        if (advisorCell && advisorCell.v !== null && advisorCell.v !== undefined) {
-          let advisorName = String(advisorCell.v).trim();
-          const normalized = normalizeName(advisorName);
-          
-          let mappedAdvisor = null;
-          
-          if (normalized === 'luz') {
-            mappedAdvisor = 'alejandra';
-          } else if (normalized.includes('tatiana')) {
-            mappedAdvisor = 'tatiana';
-          } else if (normalized.includes('danna')) {
-            mappedAdvisor = 'danna';
-          } else if (predefinedAdvisors.includes(normalized)) {
-            mappedAdvisor = normalized;
-          }
-          
-          if (mappedAdvisor) {
-            let dailySales = 0;
-            for (let i = SALES_COLUMN_START; i <= SALES_COLUMN_END; i++) {
-              if (row.c[i]) {
-                const cell = row.c[i];
-                const value = (cell.v !== null && cell.v !== undefined) ? cell.v : (cell.f || 0);
-                dailySales += parseSalesValue(value);
-              }
-            }
-            
-            advisorsMap.get(mappedAdvisor).sales += dailySales;
-            totalMonthSales += dailySales;
-            
-            if (dailySales > 0 && row.c[0]) {
-              const dateValue = row.c[0].v ?? row.c[0].f;
-              if (dateValue !== null && dateValue !== undefined) {
-                datesWithSales.add(String(dateValue));
-              }
-            }
-          }
-        }
-      });
-      
-      const advisorsData = Array.from(advisorsMap.values()).filter(advisor => advisor.sales > 0);
-      
-      if (advisorsData.length === 0) {
-        advisorsData.push(
-          { name: 'Alejandra', sales: 0 },
-          { name: 'Tatiana', sales: 0 },
-          { name: 'Danna', sales: 0 }
-        );
-      }
-      
-      renderAdvisors(advisorsData);
-      updateMonthSalesMetrics();
-      
-    } catch (error) {
-      if (advisorsTableBody) {
-        advisorsTableBody.innerHTML = `
-          <tr>
-            <td colspan="3" class="text-center p-4 text-red-500">
-              Error al cargar los datos: ${error.message}
-            </td>
-          </tr>
-        `;
-      }
-      if (advisorsTableContent) advisorsTableContent.classList.remove('hidden');
-    } finally {
-      if (advisorsLoadingState) advisorsLoadingState.classList.add('hidden');
-      if (advisorsTableContent) advisorsTableContent.classList.remove('hidden');
-    }
-  };
-  
-  const renderAdvisors = (advisors) => {
-    if (!advisorsTableBody) return;
-    advisorsTableBody.innerHTML = '';
-    
-    const sorted = advisors.sort((a, b) => b.sales - a.sales);
-    const totalSales = sorted.reduce((sum, a) => sum + a.sales, 0);
-    
-    sorted.forEach((a, index) => {
-      const percentage = totalSales > 0 ? ((a.sales / totalSales) * 100).toFixed(1) : 0;
-      
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td class="font-medium flex items-center gap-2">
-          <div class="w-3 h-3 rounded-full" style="background-color: ${advisorColors[index % advisorColors.length]}"></div>
-          ${a.name}
-        </td>
-        <td class="text-right font-semibold">${a.sales.toLocaleString('es-CO')}</td>
-        <td class="text-right">
-          <span class="text-[#080a33]/50">${percentage}%</span>
-        </td>
-      `;
-      advisorsTableBody.appendChild(row);
-    });
-  };
-  
   transactionForm?.addEventListener('submit', (e) => {
     e.preventDefault();
+    
+    const type = $('transaction-type').value;
+    const company = (type === 'ingreso' || type === 'egreso') ? transactionCompanySelect.value : '';
+    
+    if ((type === 'ingreso' || type === 'egreso') && !company) {
+      alert('Por favor selecciona una empresa');
+      return;
+    }
     
     const newTransaction = {
       id: generateUniqueId(),
       date: $('transaction-date').value || DateTime.now().toISODate(),
-      type: $('transaction-type').value || 'ingreso',
+      type: type,
       amount: parseInt($('transaction-amount').value, 10) || 0,
+      company: company,
       time: DateTime.now().toFormat('HH:mm:ss')
     };
     
     transactions.push(newTransaction);
-    saveToLocalStorage('novaklar_transactions', transactions);
+    saveToLocalStorage('nova_transactions', transactions);
     updateUI();
     
     transactionForm.reset();
@@ -941,11 +1150,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const amount = parseInt($('manual-sales-amount').value, 10) || 0;
     if (amount > 0) {
       manualSalesTotal += amount;
-      saveToLocalStorage('novaklar_manual_sales_total', manualSalesTotal);
+      saveToLocalStorage('nova_manual_sales_total', manualSalesTotal);
       updateManualSalesTotal();
       manualSalesForm.reset();
       
-      // Mostrar notificación
       if (copySuccess) {
         copySuccess.textContent = `✓ ${amount} ventas manuales agregadas`;
         copySuccess.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'border-green-200');
@@ -959,15 +1167,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirm('¿Eliminar todos los datos locales? Esta acción es irreversible.')) return;
     
     try {
-      localStorage.removeItem('novaklar_transactions');
-      localStorage.removeItem('novaklar_manual_sales_total');
+      localStorage.removeItem('nova_transactions');
+      localStorage.removeItem('nova_manual_sales_total');
+      localStorage.removeItem('nova_created_advisors');
     } catch (e) { }
     transactions = [];
     manualSalesTotal = 0;
+    createdAdvisors = [];
     selectedTransactions.clear();
     updateUI();
     
-    // Mostrar notificación
     if (copySuccess) {
       copySuccess.textContent = '✓ Todos los datos locales han sido eliminados';
       copySuccess.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'border-green-200');
@@ -986,6 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateManualSalesTotal();
     checkForAlerts();
     updateAutomaticNote();
+    renderAdvisorsList();
     fetchAndProcessSheetsData();
   };
   
