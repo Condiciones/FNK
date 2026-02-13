@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>novaklar - Finanzas Empresariales</title>
+  <title>Nova - Finanzas Empresariales</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
@@ -16,20 +16,21 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex items-center gap-4">
           <div class="logo-container">
-            <img src="https://raw.githubusercontent.com/novaklar/web/refs/heads/main/cloud.svg" 
-                 alt="novaklar Logo" 
-                 class="w-10 h-10">
+            <img src="https://raw.githubusercontent.com/Condiciones/FNK/refs/heads/main/novagroup.svg" 
+                 alt="Nova Logo" 
+                 class="w-10 h-10"
+                 style="filter: invert(1) sepia(1) saturate(5) hue-rotate(20deg) brightness(1.1);">
           </div>
           <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-[#080a33] font-desa">novaklar</h1>
-            <p class="text-[#080a33]/70 text-sm">Panel de control financiero inteligente</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-[#000000] font-desa">Nova</h1>
+            <p class="text-[#000000]/70 text-sm">Panel de control financiero inteligente</p>
           </div>
         </div>
         <div class="flex flex-col items-start md:items-end">
-          <div class="text-lg font-semibold text-[#080a33]" id="current-date">Cargando fecha...</div>
-          <div class="text-sm text-[#080a33]/50" id="current-time"></div>
+          <div class="text-lg font-semibold text-[#000000]" id="current-date">Cargando fecha...</div>
+          <div class="text-sm text-[#000000]/50" id="current-time"></div>
           <div class="mt-2 flex items-center gap-2">
-            <span class="text-xs text-[#080a33]/50">Estado:</span>
+            <span class="text-xs text-[#000000]/50">Estado:</span>
             <span class="status-indicator status-income">Conectado</span>
           </div>
         </div>
@@ -41,38 +42,38 @@
       <div class="kpi-card-new">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Balance Total</div>
-            <div id="total-balance" class="kpi-value-new">$0</div>
+            <div class="text-sm text-[#000000]/50 uppercase tracking-wider">Balance Total</div>
+            <div id="total-balance" class="kpi-value-new text-[#000000]">$0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
-            <svg class="w-6 h-6 text-[#0d4c7f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-[#106b63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Estado financiero actual</div>
+        <div class="text-xs text-[#000000]/40">Estado financiero actual</div>
       </div>
 
       <div class="kpi-card-new" id="net-cash-flow-card">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Flujo Neto Mes</div>
-            <div id="net-cash-flow" class="kpi-value-new">$0</div>
+            <div class="text-sm text-[#000000]/50 uppercase tracking-wider">Flujo Neto Mes</div>
+            <div id="net-cash-flow" class="kpi-value-new text-[#000000]">$0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
-            <svg class="w-6 h-6 text-[#7fcfda]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-[#106b63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Haz clic para ver detalles</div>
+        <div class="text-xs text-[#000000]/40">Haz clic para ver detalles</div>
       </div>
 
       <div class="kpi-card-new">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Ventas Totales Mes</div>
-            <div id="total-sales-month" class="kpi-value-new text-green-600">0</div>
+            <div class="text-sm text-[#000000]/50 uppercase tracking-wider">Ventas Totales Mes</div>
+            <div id="total-sales-month" class="kpi-value-new text-[#000000]">0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
             <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,22 +81,22 @@
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Ventas acumuladas este mes</div>
+        <div class="text-xs text-[#000000]/40">Ventas acumuladas este mes</div>
       </div>
 
       <div class="kpi-card-new">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <div class="text-sm text-[#080a33]/50 uppercase tracking-wider">Promedio Diario</div>
-            <div id="avg-daily-sales" class="kpi-value-new text-[#7fcfda]">0</div>
+            <div class="text-sm text-[#000000]/50 uppercase tracking-wider">Promedio Diario</div>
+            <div id="avg-daily-sales" class="kpi-value-new text-[#000000]">0</div>
           </div>
           <div class="bg-[#f1f5f9] p-2 rounded-lg">
-            <svg class="w-6 h-6 text-[#7fcfda]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-[#106b63]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
           </div>
         </div>
-        <div class="text-xs text-[#080a33]/40">Promedio de ventas por día</div>
+        <div class="text-xs text-[#000000]/40">Promedio de ventas por día</div>
       </div>
     </section>
 
@@ -103,8 +104,8 @@
     <div id="flow-details-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-[#080a33]">Detalles del Flujo de Caja</h3>
-          <button id="close-flow-modal" class="text-[#080a33]/50 hover:text-[#080a33] text-2xl">
+          <h3 class="text-xl font-bold text-[#000000]">Detalles del Flujo de Caja</h3>
+          <button id="close-flow-modal" class="text-[#000000]/50 hover:text-[#000000] text-2xl">
             ×
           </button>
         </div>
@@ -112,31 +113,37 @@
         <div class="mb-6">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-3 h-3 rounded-full bg-green-500"></div>
-            <span class="font-semibold text-[#080a33]">Ingresos Totales</span>
-            <span id="modal-income-total" class="ml-auto font-bold text-green-600">$0</span>
+            <span class="font-semibold text-[#000000]">Ingresos Totales</span>
+            <span id="modal-income-total" class="ml-auto font-bold text-[#000000]">$0</span>
           </div>
           
           <div class="flex items-center gap-3 mb-4">
             <div class="w-3 h-3 rounded-full bg-red-500"></div>
-            <span class="font-semibold text-[#080a33]">Egresos Totales</span>
-            <span id="modal-expense-total" class="ml-auto font-bold text-red-600">$0</span>
+            <span class="font-semibold text-[#000000]">Egresos Totales</span>
+            <span id="modal-expense-total" class="ml-auto font-bold text-[#000000]">$0</span>
+          </div>
+
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-3 h-3 rounded-full" style="background: linear-gradient(to right, #eec55b, #f8e48b)"></div>
+            <span class="font-semibold text-[#000000]">Conversiones Totales</span>
+            <span id="modal-conversion-total" class="ml-auto font-bold" style="background: linear-gradient(to right, #eec55b, #f8e48b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">$0</span>
           </div>
           
           <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
-            <div class="w-3 h-3 rounded-full bg-[#0d4c7f]"></div>
-            <span class="font-semibold text-[#080a33]">Flujo Neto</span>
-            <span id="modal-net-flow" class="ml-auto font-bold text-[#0d4c7f]">$0</span>
+            <div class="w-3 h-3 rounded-full bg-[#106b63]"></div>
+            <span class="font-semibold text-[#000000]">Flujo Neto</span>
+            <span id="modal-net-flow" class="ml-auto font-bold text-[#000000]">$0</span>
           </div>
         </div>
         
-        <div class="text-sm text-[#080a33]/70">
+        <div class="text-sm text-[#000000]/70">
           <p>Este mes: <span id="modal-month-display"></span></p>
-          <p class="mt-1">Cálculo: Ingresos - Egresos = Flujo Neto</p>
+          <p class="mt-1">Cálculo: Ingresos - Egresos = Flujo Neto (Conversiones no se restan)</p>
         </div>
         
         <div class="mt-6 pt-6 border-t border-gray-200">
-          <h4 class="font-semibold text-[#080a33] mb-3">Resumen por Categoría</h4>
-          <div id="modal-category-breakdown" class="space-y-2">
+          <h4 class="font-semibold text-[#000000] mb-3">Resumen Financiero por Usuario</h4>
+          <div id="modal-category-breakdown" class="space-y-3">
             <!-- Los datos se llenarán dinámicamente -->
           </div>
         </div>
@@ -165,7 +172,7 @@
           </div>
           <div class="space-y-6">
             <div>
-              <h3 class="font-semibold text-[#080a33] mb-4 flex items-center gap-2">
+              <h3 class="font-semibold text-[#000000] mb-4 flex items-center gap-2">
                 <span>Ingresos vs Egresos</span>
                 <span class="badge badge-primary" id="chart-period-badge">Últimos 10 días</span>
               </h3>
@@ -174,11 +181,11 @@
               </div>
             </div>
             <div>
-              <h3 class="font-semibold text-[#080a33] mb-4">Tendencia de Balance</h3>
+              <h3 class="font-semibold text-[#000000] mb-4">Tendencia de Balance</h3>
               <div class="chart-container-modern">
                 <canvas id="balance-trend-chart"></canvas>
               </div>
-              <div class="mt-4 text-center text-sm text-[#080a33]/60">
+              <div class="mt-4 text-center text-sm text-[#000000]/60">
                 Periodo mostrado: <span id="current-period-display">Últimos 10 días</span>
               </div>
             </div>
@@ -206,8 +213,8 @@
                   </th>
                   <th>Fecha</th>
                   <th>Tipo</th>
+                  <th>Empresa</th>
                   <th class="text-right">Monto</th>
-                  <th>Descripción</th>
                 </tr>
               </thead>
               <tbody id="transaction-history-body"></tbody>
@@ -225,21 +232,30 @@
           </div>
           <form id="transaction-form" class="space-y-4">
             <div>
-              <label for="transaction-date" class="block text-sm font-medium text-[#080a33] mb-2">Fecha</label>
+              <label for="transaction-date" class="block text-sm font-medium text-[#000000] mb-2">Fecha</label>
               <input type="date" id="transaction-date" required class="input-modern">
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label for="transaction-type" class="block text-sm font-medium text-[#080a33] mb-2">Tipo</label>
+                <label for="transaction-type" class="block text-sm font-medium text-[#000000] mb-2">Tipo</label>
                 <select id="transaction-type" required class="select-modern">
                   <option value="ingreso">Ingreso</option>
                   <option value="egreso">Egreso</option>
+                  <option value="conversion">Conversión</option>
                 </select>
               </div>
               <div>
-                <label for="transaction-amount" class="block text-sm font-medium text-[#080a33] mb-2">Monto</label>
+                <label for="transaction-amount" class="block text-sm font-medium text-[#000000] mb-2">Monto</label>
                 <input type="number" id="transaction-amount" placeholder="0" step="1" required class="input-modern">
               </div>
+            </div>
+            <div id="transaction-company-container" class="hidden">
+              <label for="transaction-company" class="block text-sm font-medium text-[#000000] mb-2">Empresa</label>
+              <select id="transaction-company" class="select-modern">
+                <option value="">Selecciona empresa</option>
+                <option value="novaklar">Novaklar</option>
+                <option value="hanabi">Hanabi</option>
+              </select>
             </div>
             <button type="submit" class="btn-primary-new w-full">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,7 +274,7 @@
           <div class="space-y-4">
             <form id="manual-sales-form" class="space-y-4">
               <div>
-                <label for="manual-sales-amount" class="block text-sm font-medium text-[#080a33] mb-2">Número de ventas</label>
+                <label for="manual-sales-amount" class="block text-sm font-medium text-[#000000] mb-2">Número de ventas</label>
                 <input type="number" id="manual-sales-amount" placeholder="0" step="1" required class="input-modern">
               </div>
               <button type="submit" class="btn-primary-new w-full">
@@ -269,8 +285,41 @@
               </button>
             </form>
             <div class="form-card text-center">
-              <p class="text-sm text-[#080a33]/70">Total VTM Acumulado</p>
-              <p id="manual-sales-total" class="text-2xl font-bold text-green-600 mt-2">0</p>
+              <p class="text-sm text-[#000000]/70">Total VTM Acumulado</p>
+              <p id="manual-sales-total" class="text-2xl font-bold text-[#000000] mt-2">0</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Gestionar Asesores -->
+        <section class="main-panel animate-fade-in-up" style="animation-delay: 0.55s">
+          <div class="panel-header">
+            <h2 class="panel-title">Gestionar Asesores</h2>
+          </div>
+          <form id="advisor-form" class="space-y-4">
+            <div>
+              <label for="advisor-name" class="block text-sm font-medium text-[#000000] mb-2">Nombre</label>
+              <input type="text" id="advisor-name" placeholder="Ej: Tatiana" required class="input-modern">
+            </div>
+            <div>
+              <label for="advisor-company" class="block text-sm font-medium text-[#000000] mb-2">Empresa</label>
+              <select id="advisor-company" required class="select-modern">
+                <option value="">Selecciona una empresa</option>
+                <option value="novaklar">Novaklar</option>
+                <option value="hanabi">Hanabi</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-primary-new w-full">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Crear Asesor
+            </button>
+          </form>
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <p class="text-xs text-[#000000]/50 mb-2">Asesores creados:</p>
+            <div id="advisors-list" class="space-y-2 max-h-40 overflow-y-auto">
+              <p class="text-sm text-[#000000]/60 text-center py-2">Sin asesores creados</p>
             </div>
           </div>
         </section>
@@ -302,11 +351,11 @@
         <!-- Alertas y Notas -->
         <section class="main-panel animate-fade-in-up" style="animation-delay: 0.7s">
           <div class="panel-header">
-            <h2 class="panel-title">Alertas y Notas</h2>
+            <h2 class="panel-title">Alertas Inteligentes</h2>
           </div>
           <div class="space-y-4">
             <div id="alerts-container">
-              <div class="text-center py-8 text-[#080a33]/50">
+              <div class="text-center py-8 text-[#000000]/50">
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
@@ -314,9 +363,9 @@
               </div>
             </div>
             <div class="form-card">
-              <h3 class="font-semibold text-[#080a33] mb-3">Última Actividad</h3>
-              <p id="automatic-note" class="text-sm text-[#080a33]/70">No hay registros recientes</p>
-              <p id="last-transaction-note" class="text-xs text-[#080a33]/50 mt-2"></p>
+              <h3 class="font-semibold text-[#000000] mb-3">Última Actividad</h3>
+              <p id="automatic-note" class="text-sm text-[#000000]/70">No hay registros recientes</p>
+              <p id="last-transaction-note" class="text-xs text-[#000000]/50 mt-2"></p>
             </div>
           </div>
         </section>
@@ -330,7 +379,7 @@
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="space-y-4">
-          <h3 class="font-semibold text-[#080a33]">Exportar Datos</h3>
+          <h3 class="font-semibold text-[#000000]">Exportar Datos</h3>
           <button id="export-data-button" class="btn-primary-new w-full">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -346,7 +395,7 @@
         </div>
 
         <div class="space-y-4">
-          <h3 class="font-semibold text-[#080a33]">Importar Datos</h3>
+          <h3 class="font-semibold text-[#000000]">Importar Datos</h3>
           <input type="file" id="import-data-file" accept=".json" class="hidden">
           <button id="import-data-button" class="btn-primary-new w-full">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,7 +412,7 @@
         </div>
 
         <div class="space-y-4">
-          <h3 class="font-semibold text-[#080a33]">Configuración</h3>
+          <h3 class="font-semibold text-[#000000]">Configuración</h3>
           <select id="config-currency" class="select-modern">
             <option value="COP">COP - Peso Colombiano</option>
             <option value="USD">USD - Dólar Americano</option>
@@ -379,9 +428,9 @@
       </div>
 
       <div id="import-text-container" class="hidden mt-6 p-6 bg-[#f8f9fa] rounded-xl border border-gray-200">
-        <h4 class="font-semibold text-[#080a33] mb-3">Pegar datos JSON</h4>
+        <h4 class="font-semibold text-[#000000] mb-3">Pegar datos JSON</h4>
         <textarea id="import-text-area" 
-                 class="w-full h-40 p-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-[#7fcfda] text-[#080a33] bg-white"
+                 class="w-full h-40 p-4 rounded-lg border-gray-300 focus:ring-2 focus:ring-[#106b63] text-[#000000] bg-white"
                  placeholder="Pega aquí el texto JSON que copiaste..."></textarea>
         <div class="flex gap-3 mt-4">
           <button id="import-from-text-button" class="btn-primary-new">
@@ -402,20 +451,20 @@
     <!-- Footer -->
     <footer class="mt-8 pt-6 border-t border-gray-200">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="text-sm text-[#080a33]/70">
-          <p>novaklar - Sistema de Finanzas Empresariales</p>
-          <p class="text-xs mt-1">v2.0 • Diseño optimizado • Actualizado en tiempo real</p>
+        <div class="text-sm text-[#000000]/70">
+          <p>Nova - Sistema de Finanzas Empresariales</p>
+          <p class="text-xs mt-1">v3.0 • Diseño optimizado • Actualizado en tiempo real</p>
         </div>
         <div class="flex gap-6">
           <a href="https://novaklar.github.io/web/" target="_blank" 
-             class="text-sm text-[#080a33]/70 hover:text-[#0d4c7f] transition-colors flex items-center gap-1">
+             class="text-sm text-[#000000]/70 hover:text-[#106b63] transition-colors flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
             </svg>
             Afiliados
           </a>
           <a href="https://novaklar.github.io/Personal/" target="_blank" 
-             class="text-sm text-[#080a33]/70 hover:text-[#0d4c7f] transition-colors flex items-center gap-1">
+             class="text-sm text-[#000000]/70 hover:text-[#106b63] transition-colors flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
