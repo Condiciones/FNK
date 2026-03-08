@@ -17,6 +17,12 @@
   --gradient-start: #eec55b;
   --gradient-end: #f8e48b;
   --logo-color: #eec55b;
+  /* ============================================= */
+  /* NUEVA VARIABLE: Color para elementos de Caja  */
+  /* ============================================= */
+  --caja-primary: #3b82f6; /* Azul para diferenciar */
+  --caja-primary-light: #60a5fa;
+  --caja-primary-dark: #2563eb;
 }
 
 @font-face {
@@ -120,6 +126,52 @@ body {
   line-height: 1;
   margin: 0.5rem 0;
   color: #000000 !important;
+}
+
+/* ============================================= */
+/* NUEVO ESTILO: Tarjeta de Caja (con barra azul) */
+/* ============================================= */
+.kpi-card-caja {
+  composes: kpi-card-new; /* Hereda los estilos base (esto es solo ilustrativo, en CSS puro lo aplicamos en el HTML con class="kpi-card-new kpi-card-caja") */
+}
+
+.kpi-card-caja::before {
+  background: var(--caja-primary) !important; /* Sobrescribe la barra superior a azul */
+}
+
+/* ============================================= */
+/* NUEVO ESTILO: Badge para "Configuración Inicial" */
+/* ============================================= */
+.badge-caja {
+  background: #dbeafe; /* Azul claro */
+  color: var(--caja-primary-dark);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  display: inline-block;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* ============================================= */
+/* NUEVO ESTILO: Botón de acción de caja (Configurar/Ver Historial) */
+/* ============================================= */
+.caja-action-btn {
+  background: transparent;
+  border: 1px solid var(--caja-primary);
+  color: var(--caja-primary-dark);
+  padding: 0.4rem 1rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.caja-action-btn:hover {
+  background: var(--caja-primary);
+  color: white;
+  border-color: var(--caja-primary);
 }
 
 /* Paneles principales */
@@ -325,6 +377,14 @@ body {
   background: linear-gradient(90deg, #e0f7fa 0%, white 100%);
 }
 
+/* ============================================= */
+/* NUEVO ESTILO: Alerta específica para Caja */
+/* ============================================= */
+.alert-caja {
+  border-left-color: var(--caja-primary);
+  background: linear-gradient(90deg, #dbeafe 0%, white 100%);
+}
+
 /* Indicadores de estado */
 .status-indicator {
   display: inline-flex;
@@ -477,6 +537,13 @@ body {
   animation: slideUp 0.3s ease;
 }
 
+/* ============================================= */
+/* NUEVO ESTILO: Variante para el modal de Caja */
+/* ============================================= */
+.modal-content-caja {
+  max-width: 400px; /* Más pequeño para un simple input */
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -564,4 +631,11 @@ body {
   font-weight: 600;
   color: #000000;
   font-size: 0.95rem;
+}
+
+/* ============================================= */
+/* NUEVO ESTILO: Contenedor de alertas de caja */
+/* ============================================= */
+#caja-alerts-container {
+  margin-top: 0.5rem;
 }
