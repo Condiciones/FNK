@@ -67,10 +67,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelImportButton = $('cancel-import-button');
   const copySuccess = $('copy-success');
   
+  // =============================================
+  // NUEVAS VARIABLES Y ELEMENTOS DE CAJA
+  // =============================================
+  const cajaBalanceEl = $('caja-balance');
+  const cajaActionButton = $('caja-action-button');
+  const cajaInitialBadge = $('caja-initial-badge');
+  const cajaConfigModal = $('caja-config-modal');
+  const cajaInitialForm = $('caja-initial-form');
+  const cajaInitialAmount = $('caja-initial-amount');
+  const closeCajaModal = $('close-caja-modal');
+  const cancelCajaModal = $('cancel-caja-modal');
+  const cajaAlertsContainer = $('caja-alerts-container');
+  const cajaCard = $('caja-card');
+  
   let balanceChart, balanceTrendChart;
   let transactions = getFromLocalStorage('nova_transactions', []);
   let manualSalesTotal = getFromLocalStorage('nova_manual_sales_total', 0);
   let createdAdvisors = getFromLocalStorage('nova_created_advisors', []);
+  // =============================================
+  // NUEVAS VARIABLES DE ESTADO PARA CAJA
+  // =============================================
+  let cajaSaldoInicial = getFromLocalStorage('nova_caja_saldo_inicial', null);
+  let cajaSaldoActual = getFromLocalStorage('nova_caja_saldo_actual', 0);
+  
   let sheetRawData = null;
   let dateFilter = { type: 'last10', start: null, end: null };
   let selectedTransactions = new Set();
@@ -94,6 +114,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
+  // =============================================
+  // NUEVAS FUNCIONES PARA GUARDAR/CARGAR ESTADO DE CAJA
+  // =============================================
+  function saveCajaState() {
+    saveToLocalStorage('nova_caja_saldo_inicial', cajaSaldoInicial);
+    saveToLocalStorage('nova_caja_saldo_actual', cajaSaldoActual);
+  }
+
+  function loadCajaState() {
+    cajaSaldoInicial = getFromLocalStorage('nova_caja_saldo_inicial', null);
+    cajaSaldoActual = getFromLocalStorage('nova_caja_saldo_actual', 0);
+  }
+  
   const generateUniqueId = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
   const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
   const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
@@ -114,6 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
     transactions,
     manualSalesTotal,
     createdAdvisors,
+    // =============================================
+    // NUEVO: Incluir estado de caja en exportación
+    // =============================================
+    cajaSaldoInicial,
+    cajaSaldoActual,
     exportDate: DateTime.now().toISO(),
     version: "3.0",
     note: "Datos locales de Nova Finanzas"
@@ -200,6 +238,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (importedData.createdAdvisors && Array.isArray(importedData.createdAdvisors)) {
       createdAdvisors = importedData.createdAdvisors;
       saveToLocalStorage('nova_created_advisors', createdAdvisors);
+    }
+    
+    // =============================================
+    // NUEVO: Importar estado de caja
+    // =============================================
+    if (importedData.cajaSaldoInicial !== undefined) {
+      cajaSaldoInicial = importedData.cajaSaldoInicial;
+      cajaSaldoActual = importedData.cajaSaldoActual !== undefined ? importedData.cajaSaldoActual : cajaSaldoInicial;
+      saveCajaState();
     }
     
     if (importDataFile) importDataFile.value = '';
@@ -482,9 +529,89 @@ document.addEventListener('DOMContentLoaded', () => {
     return transactions;
   }
   
+  // =============================================
+  // NUEVA FUNCIÓN: Actualizar la interfaz de Caja
+  // =============================================
+  const updateCajaUI = () => {
+    if (!cajaBalanceEl || !cajaActionButton || !cajaInitialBadge || !cajaCard) return;
+    
+    // Aplicar la clase de estilo especial a la tarjeta de caja
+    cajaCard.classList.add('kpi-card-caja');
+    
+    if (cajaSaldoInicial !== null) {
+      // Caja configurada
+      cajaBalanceEl.textContent = `$${cajaSaldoActual.toLocaleString('es-CO', numberFormatOptions)}`;
+      cajaInitialBadge.classList.remove('hidden');
+      cajaActionButton.textContent = 'Ver Historial';
+      
+      // Cambiar el color del saldo si es bajo (ejemplo: < 1000)
+      if (cajaSaldoActual < 1000) {
+        cajaBalanceEl.classList.add('text-red-600');
+        cajaBalanceEl.classList.remove('text-[#000000]');
+      } else {
+        cajaBalanceEl.classList.remove('text-red-600');
+        cajaBalanceEl.classList.add('text-[#000000]');
+      }
+    } else {
+      // Caja NO configurada
+      cajaBalanceEl.textContent = '$0';
+      cajaInitialBadge.classList.add('hidden');
+      cajaActionButton.textContent = 'Configurar Saldo Inicial';
+      cajaBalanceEl.classList.remove('text-red-600');
+      cajaBalanceEl.classList.add('text-[#000000]');
+    }
+  };
+
+  // =============================================
+  // NUEVA FUNCIÓN: Actualizar saldo de caja desde una transacción
+  // =============================================
+  const updateCajaSaldoFromTransaction = (transaction) => {
+    if (cajaSaldoInicial === null) return; // Caja no configurada, no afecta
+    
+    const amount = transaction.amount || 0;
+    
+    switch(transaction.type) {
+      case 'ingreso':
+        cajaSaldoActual += amount;
+        break;
+      case 'egreso':
+      case 'conversion':
+        cajaSaldoActual -= amount;
+        break;
+    }
+    
+    saveCajaState();
+    updateCajaUI();
+  };
+
+  // =============================================
+  // NUEVA FUNCIÓN: Recalcular saldo de caja desde cero
+  // (Útil después de importar o eliminar transacciones)
+  // =============================================
+  const recalcularCajaDesdeInicial = () => {
+    if (cajaSaldoInicial === null) {
+      cajaSaldoActual = 0;
+    } else {
+      cajaSaldoActual = transactions.reduce((saldo, t) => {
+        if (t.type === 'ingreso') {
+          return saldo + (t.amount || 0);
+        } else if (t.type === 'egreso' || t.type === 'conversion') {
+          return saldo - (t.amount || 0);
+        }
+        return saldo;
+      }, cajaSaldoInicial);
+    }
+    saveCajaState();
+    updateCajaUI();
+  };
+  
   const checkForAlerts = () => {
     if (!alertsContainer) return;
+    
+    // Limpiar contenedores de alertas
     alertsContainer.innerHTML = '';
+    if (cajaAlertsContainer) cajaAlertsContainer.innerHTML = '';
+    
     const now = DateTime.now();
     
     const currentMonthIncome = sumTransactions(t => {
@@ -549,6 +676,45 @@ document.addEventListener('DOMContentLoaded', () => {
         alertsContainer.appendChild(node);
       });
     }
+    
+    // =============================================
+    // NUEVAS ALERTAS DE CAJA
+    // =============================================
+    if (cajaAlertsContainer && cajaSaldoInicial !== null) {
+      const cajaAlerts = [];
+      
+      // Alerta de Saldo Bajo (menos de $1,000)
+      const UMBRAL_SALDO_BAJO = 1000;
+      if (cajaSaldoActual < UMBRAL_SALDO_BAJO) {
+        cajaAlerts.push({
+          type: 'caja',
+          message: `⚠️ Saldo de caja bajo: $${cajaSaldoActual.toLocaleString('es-CO')} (menos de $${UMBRAL_SALDO_BAJO.toLocaleString('es-CO')})`
+        });
+      }
+      
+      // Alerta por Conversiones Excesivas en los últimos 30 días
+      const treintaDiasAtras = now.minus({ days: 30 }).toISODate();
+      const conversionesRecientes = transactions.filter(t => 
+        t.type === 'conversion' && t.date >= treintaDiasAtras
+      );
+      const totalConversionesRecientes = conversionesRecientes.reduce((sum, t) => sum + (t.amount || 0), 0);
+      
+      if (totalConversionesRecientes > cajaSaldoActual * 0.5) { // Si conversiones > 50% del saldo actual
+        cajaAlerts.push({
+          type: 'caja',
+          message: `🔄 Conversiones excesivas ($${totalConversionesRecientes.toLocaleString('es-CO')}) en los últimos 30 días representan más del 50% del saldo actual.`
+        });
+      }
+      
+      if (cajaAlerts.length > 0) {
+        cajaAlerts.forEach(alert => {
+          const node = document.createElement('div');
+          node.className = 'alert-modern alert-caja';
+          node.textContent = alert.message;
+          cajaAlertsContainer.appendChild(node);
+        });
+      }
+    }
   };
   
   const updateAutomaticNote = () => {
@@ -592,6 +758,12 @@ document.addEventListener('DOMContentLoaded', () => {
       saveToLocalStorage('nova_transactions', transactions);
       selectedTransactions.clear();
       toggleDeleteButton();
+      
+      // =============================================
+      // NUEVO: Recalcular caja después de eliminar transacciones
+      // =============================================
+      recalcularCajaDesdeInicial();
+      
       updateUI();
     });
   };
@@ -1116,28 +1288,110 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+  // =============================================
+  // NUEVA LÓGICA: Modal de Configuración de Caja
+  // =============================================
+  if (cajaActionButton) {
+    cajaActionButton.addEventListener('click', () => {
+      if (cajaSaldoInicial === null) {
+        // Mostrar modal para configurar saldo inicial
+        if (cajaConfigModal) {
+          cajaConfigModal.style.display = 'flex';
+          if (cajaInitialAmount) {
+            cajaInitialAmount.value = '';
+            cajaInitialAmount.focus();
+          }
+        }
+      } else {
+        // TODO: Mostrar historial de caja (futura funcionalidad)
+        alert('Funcionalidad "Ver Historial" próximamente disponible.');
+      }
+    });
+  }
+
+  // Cerrar modal de caja
+  const closeCajaModalFunc = () => {
+    if (cajaConfigModal) cajaConfigModal.style.display = 'none';
+  };
+
+  if (closeCajaModal) {
+    closeCajaModal.addEventListener('click', closeCajaModalFunc);
+  }
+
+  if (cancelCajaModal) {
+    cancelCajaModal.addEventListener('click', closeCajaModalFunc);
+  }
+
+  if (cajaConfigModal) {
+    cajaConfigModal.addEventListener('click', (e) => {
+      if (e.target === cajaConfigModal) {
+        closeCajaModalFunc();
+      }
+    });
+  }
+
+  // Guardar saldo inicial de caja
+  if (cajaInitialForm) {
+    cajaInitialForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const monto = parseInt(cajaInitialAmount.value, 10);
+      if (isNaN(monto) || monto <= 0) {
+        alert('Por favor ingresa un monto válido mayor a cero.');
+        return;
+      }
+      
+      cajaSaldoInicial = monto;
+      cajaSaldoActual = monto;
+      saveCajaState();
+      
+      closeCajaModalFunc();
+      updateCajaUI();
+      checkForAlerts(); // Actualizar alertas (ahora la caja está configurada)
+    });
+  }
+  
   transactionForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const type = $('transaction-type').value;
     const company = (type === 'ingreso' || type === 'egreso') ? transactionCompanySelect.value : '';
+    const amount = parseInt($('transaction-amount').value, 10) || 0;
     
     if ((type === 'ingreso' || type === 'egreso') && !company) {
       alert('Por favor selecciona una empresa');
       return;
     }
     
+    // =============================================
+    // NUEVO: Validación de saldo de caja para egresos y conversiones
+    // =============================================
+    if (cajaSaldoInicial !== null && (type === 'egreso' || type === 'conversion')) {
+      if (amount > cajaSaldoActual) {
+        const confirmar = confirm(`⚠️ ADVERTENCIA: Este ${type === 'egreso' ? 'egreso' : 'conversión'} de $${amount.toLocaleString('es-CO')} supera el saldo actual de caja ($${cajaSaldoActual.toLocaleString('es-CO')}).\n\n¿Aún así deseas registrarlo? (Ej: si tienes crédito o fondos por llegar)`);
+        if (!confirmar) {
+          return; // Cancelar el registro
+        }
+      }
+    }
+    
     const newTransaction = {
       id: generateUniqueId(),
       date: $('transaction-date').value || DateTime.now().toISODate(),
       type: type,
-      amount: parseInt($('transaction-amount').value, 10) || 0,
+      amount: amount,
       company: company,
       time: DateTime.now().toFormat('HH:mm:ss')
     };
     
     transactions.push(newTransaction);
     saveToLocalStorage('nova_transactions', transactions);
+    
+    // =============================================
+    // NUEVO: Actualizar caja con la nueva transacción
+    // =============================================
+    updateCajaSaldoFromTransaction(newTransaction);
+    
     updateUI();
     
     transactionForm.reset();
@@ -1170,10 +1424,21 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('nova_transactions');
       localStorage.removeItem('nova_manual_sales_total');
       localStorage.removeItem('nova_created_advisors');
+      // =============================================
+      // NUEVO: Eliminar estado de caja
+      // =============================================
+      localStorage.removeItem('nova_caja_saldo_inicial');
+      localStorage.removeItem('nova_caja_saldo_actual');
     } catch (e) { }
     transactions = [];
     manualSalesTotal = 0;
     createdAdvisors = [];
+    // =============================================
+    // NUEVO: Reiniciar estado de caja
+    // =============================================
+    cajaSaldoInicial = null;
+    cajaSaldoActual = 0;
+    
     selectedTransactions.clear();
     updateUI();
     
@@ -1193,6 +1458,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCharts();
     renderTransactions();
     updateManualSalesTotal();
+    // =============================================
+    // NUEVO: Actualizar UI de caja en cada actualización
+    // =============================================
+    updateCajaUI();
     checkForAlerts();
     updateAutomaticNote();
     renderAdvisorsList();
@@ -1200,6 +1469,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   
   if ($('transaction-date')) $('transaction-date').value = DateTime.now().toISODate();
+  
+  // =============================================
+  // NUEVO: Cargar estado de caja al iniciar
+  // =============================================
+  loadCajaState();
   
   updateUI();
   setInterval(fetchAndProcessSheetsData, UPDATE_INTERVAL);
