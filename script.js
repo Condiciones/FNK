@@ -67,9 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelImportButton = $('cancel-import-button');
   const copySuccess = $('copy-success');
   
-  // =============================================
-  // NUEVAS VARIABLES Y ELEMENTOS DE CAJA
-  // =============================================
   const cajaBalanceEl = $('caja-balance');
   const cajaActionButton = $('caja-action-button');
   const cajaInitialBadge = $('caja-initial-badge');
@@ -85,11 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let transactions = getFromLocalStorage('nova_transactions', []);
   let manualSalesTotal = getFromLocalStorage('nova_manual_sales_total', 0);
   let createdAdvisors = getFromLocalStorage('nova_created_advisors', []);
-  // =============================================
-  // NUEVAS VARIABLES DE ESTADO PARA CAJA
-  // =============================================
+  
   let cajaSaldoInicial = getFromLocalStorage('nova_caja_saldo_inicial', null);
   let cajaSaldoActual = getFromLocalStorage('nova_caja_saldo_actual', 0);
+  let cajaFechaActivacion = getFromLocalStorage('nova_caja_fecha_activacion', null);
   
   let sheetRawData = null;
   let dateFilter = { type: 'last10', start: null, end: null };
@@ -114,24 +110,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // =============================================
-  // NUEVAS FUNCIONES PARA GUARDAR/CARGAR ESTADO DE CAJA
-  // =============================================
   function saveCajaState() {
     saveToLocalStorage('nova_caja_saldo_inicial', cajaSaldoInicial);
     saveToLocalStorage('nova_caja_saldo_actual', cajaSaldoActual);
+    saveToLocalStorage('nova_caja_fecha_activacion', cajaFechaActivacion);
   }
 
   function loadCajaState() {
     cajaSaldoInicial = getFromLocalStorage('nova_caja_saldo_inicial', null);
     cajaSaldoActual = getFromLocalStorage('nova_caja_saldo_actual', 0);
+    cajaFechaActivacion = getFromLocalStorage('nova_caja_fecha_activacion', null);
   }
+  
+  const transaccionAfectaCaja = (transaccion) => {
+    if (!cajaFechaActivacion) return false;
+    const fechaTransaccion = new Date(transaccion.date + 'T' + (transaccion.time || '00:00:00'));
+    const fechaActivacion = new Date(cajaFechaActivacion);
+    return fechaTransaccion >= fechaActivacion;
+  };
   
   const generateUniqueId = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
   const parseSalesValue = (value) => parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
   const normalizeName = (name) => (name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
-  
-  // ==================== TRANSACTION TYPE SELECTOR ====================
   
   transactionTypeSelect?.addEventListener('change', (e) => {
     const type = e.target.value;
@@ -147,17 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
     transactions,
     manualSalesTotal,
     createdAdvisors,
-    // =============================================
-    // NUEVO: Incluir estado de caja en exportación
-    // =============================================
     cajaSaldoInicial,
     cajaSaldoActual,
+    cajaFechaActivacion,
     exportDate: DateTime.now().toISO(),
-    version: "3.0",
+    version: "3.1",
     note: "Datos locales de Nova Finanzas"
   }, null, 2);
-  
-  // ==================== EXPORT/IMPORT ====================
   
   copyDataButton?.addEventListener('click', async () => {
     try {
@@ -240,12 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
       saveToLocalStorage('nova_created_advisors', createdAdvisors);
     }
     
-    // =============================================
-    // NUEVO: Importar estado de caja
-    // =============================================
     if (importedData.cajaSaldoInicial !== undefined) {
       cajaSaldoInicial = importedData.cajaSaldoInicial;
       cajaSaldoActual = importedData.cajaSaldoActual !== undefined ? importedData.cajaSaldoActual : cajaSaldoInicial;
+      cajaFechaActivacion = importedData.cajaFechaActivacion || null;
       saveCajaState();
     }
     
@@ -253,8 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
     alert('Datos locales cargados exitosamente.');
   }
-  
-  // ==================== ADVISORS MANAGEMENT ====================
   
   const renderAdvisorsList = () => {
     if (!advisorsList) return;
@@ -305,8 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdvisorsList();
     updateAdvisorsPerformance();
   });
-  
-  // ==================== FETCH GOOGLE SHEETS DATA ====================
   
   const fetchAndProcessSheetsData = async () => {
     try {
@@ -463,8 +453,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function sumTransactions(predicate) {
     return transactions.filter(predicate).reduce((s, t) => s + (t.amount || 0), 0);
   }
-
-  // ==================== NUEVA FUNCIÓN: OBTENER DATOS SEPARADOS POR USUARIO ====================
   
   const getCashFlowByUser = (month, year) => {
     const novaklar = {
@@ -529,22 +517,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return transactions;
   }
   
-  // =============================================
-  // NUEVA FUNCIÓN: Actualizar la interfaz de Caja
-  // =============================================
   const updateCajaUI = () => {
     if (!cajaBalanceEl || !cajaActionButton || !cajaInitialBadge || !cajaCard) return;
     
-    // Aplicar la clase de estilo especial a la tarjeta de caja
     cajaCard.classList.add('kpi-card-caja');
     
-    if (cajaSaldoInicial !== null) {
-      // Caja configurada
+    if (cajaSaldoInicial !== null && cajaFechaActivacion) {
       cajaBalanceEl.textContent = `$${cajaSaldoActual.toLocaleString('es-CO', numberFormatOptions)}`;
       cajaInitialBadge.classList.remove('hidden');
-      cajaActionButton.textContent = 'Ver Historial';
+      cajaInitialBadge.textContent = `Desde ${DateTime.fromISO(cajaFechaActivacion).toFormat('dd/MM/yyyy HH:mm')}`;
+      cajaActionButton.textContent = 'Configurar Saldo Inicial';
       
-      // Cambiar el color del saldo si es bajo (ejemplo: < 1000)
+      const descripcion = document.getElementById('caja-description');
+      if (descripcion) {
+        descripcion.textContent = `Saldo real (post-configuración)`;
+      }
+      
       if (cajaSaldoActual < 1000) {
         cajaBalanceEl.classList.add('text-red-600');
         cajaBalanceEl.classList.remove('text-[#000000]');
@@ -553,20 +541,22 @@ document.addEventListener('DOMContentLoaded', () => {
         cajaBalanceEl.classList.add('text-[#000000]');
       }
     } else {
-      // Caja NO configurada
       cajaBalanceEl.textContent = '$0';
       cajaInitialBadge.classList.add('hidden');
       cajaActionButton.textContent = 'Configurar Saldo Inicial';
       cajaBalanceEl.classList.remove('text-red-600');
       cajaBalanceEl.classList.add('text-[#000000]');
+      
+      const descripcion = document.getElementById('caja-description');
+      if (descripcion) {
+        descripcion.textContent = 'Efectivo disponible';
+      }
     }
   };
 
-  // =============================================
-  // NUEVA FUNCIÓN: Actualizar saldo de caja desde una transacción
-  // =============================================
   const updateCajaSaldoFromTransaction = (transaction) => {
-    if (cajaSaldoInicial === null) return; // Caja no configurada, no afecta
+    if (cajaSaldoInicial === null || !cajaFechaActivacion) return;
+    if (!transaccionAfectaCaja(transaction)) return;
     
     const amount = transaction.amount || 0;
     
@@ -584,23 +574,29 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCajaUI();
   };
 
-  // =============================================
-  // NUEVA FUNCIÓN: Recalcular saldo de caja desde cero
-  // (Útil después de importar o eliminar transacciones)
-  // =============================================
   const recalcularCajaDesdeInicial = () => {
-    if (cajaSaldoInicial === null) {
+    if (cajaSaldoInicial === null || !cajaFechaActivacion) {
       cajaSaldoActual = 0;
-    } else {
-      cajaSaldoActual = transactions.reduce((saldo, t) => {
-        if (t.type === 'ingreso') {
-          return saldo + (t.amount || 0);
-        } else if (t.type === 'egreso' || t.type === 'conversion') {
-          return saldo - (t.amount || 0);
-        }
-        return saldo;
-      }, cajaSaldoInicial);
+      saveCajaState();
+      updateCajaUI();
+      return;
     }
+    
+    const transaccionesRelevantes = transactions.filter(t => transaccionAfectaCaja(t));
+    
+    const transaccionesOrdenadas = [...transaccionesRelevantes].sort((a, b) => 
+      new Date(a.date + 'T' + (a.time || '00:00:00')) - new Date(b.date + 'T' + (b.time || '00:00:00'))
+    );
+    
+    cajaSaldoActual = transaccionesOrdenadas.reduce((saldo, t) => {
+      if (t.type === 'ingreso') {
+        return saldo + (t.amount || 0);
+      } else if (t.type === 'egreso' || t.type === 'conversion') {
+        return saldo - (t.amount || 0);
+      }
+      return saldo;
+    }, cajaSaldoInicial);
+    
     saveCajaState();
     updateCajaUI();
   };
@@ -608,7 +604,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const checkForAlerts = () => {
     if (!alertsContainer) return;
     
-    // Limpiar contenedores de alertas
     alertsContainer.innerHTML = '';
     if (cajaAlertsContainer) cajaAlertsContainer.innerHTML = '';
     
@@ -677,13 +672,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
     
-    // =============================================
-    // NUEVAS ALERTAS DE CAJA
-    // =============================================
     if (cajaAlertsContainer && cajaSaldoInicial !== null) {
       const cajaAlerts = [];
       
-      // Alerta de Saldo Bajo (menos de $1,000)
       const UMBRAL_SALDO_BAJO = 1000;
       if (cajaSaldoActual < UMBRAL_SALDO_BAJO) {
         cajaAlerts.push({
@@ -692,14 +683,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
       
-      // Alerta por Conversiones Excesivas en los últimos 30 días
       const treintaDiasAtras = now.minus({ days: 30 }).toISODate();
       const conversionesRecientes = transactions.filter(t => 
         t.type === 'conversion' && t.date >= treintaDiasAtras
       );
       const totalConversionesRecientes = conversionesRecientes.reduce((sum, t) => sum + (t.amount || 0), 0);
       
-      if (totalConversionesRecientes > cajaSaldoActual * 0.5) { // Si conversiones > 50% del saldo actual
+      if (totalConversionesRecientes > cajaSaldoActual * 0.5) {
         cajaAlerts.push({
           type: 'caja',
           message: `🔄 Conversiones excesivas ($${totalConversionesRecientes.toLocaleString('es-CO')}) en los últimos 30 días representan más del 50% del saldo actual.`
@@ -759,9 +749,6 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedTransactions.clear();
       toggleDeleteButton();
       
-      // =============================================
-      // NUEVO: Recalcular caja después de eliminar transacciones
-      // =============================================
       recalcularCajaDesdeInicial();
       
       updateUI();
@@ -812,8 +799,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // ==================== MODAL CON DESGLOSE POR USUARIO ====================
-  
   const showFlowDetailsModal = () => {
     const now = DateTime.now();
     const { cashInflow, cashOutflow, cashConversion, net } = updateMonthlyFinancials();
@@ -842,7 +827,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryBreakdown = $('modal-category-breakdown');
     if (categoryBreakdown) {
       categoryBreakdown.innerHTML = `
-        <!-- RESUMEN GENERAL -->
         <div class="mb-6 pb-4 border-b border-gray-200">
           <h5 class="font-bold text-[#000000] text-sm uppercase tracking-wider mb-3">Resumen General del Mes</h5>
           <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg mb-2">
@@ -859,7 +843,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
 
-        <!-- NOVAKLAR -->
         <div class="user-breakdown-section mb-4">
           <div class="user-breakdown-header">👤 Novaklar</div>
           <div class="breakdown-item">
@@ -882,7 +865,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
 
-        <!-- HANABI -->
         <div class="user-breakdown-section">
           <div class="user-breakdown-header">👤 Hanabi</div>
           <div class="breakdown-item">
@@ -1288,28 +1270,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // =============================================
-  // NUEVA LÓGICA: Modal de Configuración de Caja
-  // =============================================
   if (cajaActionButton) {
     cajaActionButton.addEventListener('click', () => {
-      if (cajaSaldoInicial === null) {
-        // Mostrar modal para configurar saldo inicial
-        if (cajaConfigModal) {
-          cajaConfigModal.style.display = 'flex';
-          if (cajaInitialAmount) {
-            cajaInitialAmount.value = '';
-            cajaInitialAmount.focus();
-          }
+      if (cajaConfigModal) {
+        cajaConfigModal.style.display = 'flex';
+        if (cajaInitialAmount) {
+          cajaInitialAmount.value = '';
+          cajaInitialAmount.focus();
         }
-      } else {
-        // TODO: Mostrar historial de caja (futura funcionalidad)
-        alert('Funcionalidad "Ver Historial" próximamente disponible.');
       }
     });
   }
 
-  // Cerrar modal de caja
   const closeCajaModalFunc = () => {
     if (cajaConfigModal) cajaConfigModal.style.display = 'none';
   };
@@ -1330,7 +1302,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Guardar saldo inicial de caja
   if (cajaInitialForm) {
     cajaInitialForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1341,13 +1312,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
+      cajaFechaActivacion = DateTime.now().toISO();
       cajaSaldoInicial = monto;
       cajaSaldoActual = monto;
+      
       saveCajaState();
       
       closeCajaModalFunc();
       updateCajaUI();
-      checkForAlerts(); // Actualizar alertas (ahora la caja está configurada)
+      checkForAlerts();
     });
   }
   
@@ -1363,14 +1336,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    // =============================================
-    // NUEVO: Validación de saldo de caja para egresos y conversiones
-    // =============================================
     if (cajaSaldoInicial !== null && (type === 'egreso' || type === 'conversion')) {
       if (amount > cajaSaldoActual) {
-        const confirmar = confirm(`⚠️ ADVERTENCIA: Este ${type === 'egreso' ? 'egreso' : 'conversión'} de $${amount.toLocaleString('es-CO')} supera el saldo actual de caja ($${cajaSaldoActual.toLocaleString('es-CO')}).\n\n¿Aún así deseas registrarlo? (Ej: si tienes crédito o fondos por llegar)`);
+        const confirmar = confirm(`⚠️ ADVERTENCIA: Este ${type === 'egreso' ? 'egreso' : 'conversión'} de $${amount.toLocaleString('es-CO')} supera el saldo actual de caja ($${cajaSaldoActual.toLocaleString('es-CO')}).\n\n¿Aún así deseas registrarlo?`);
         if (!confirmar) {
-          return; // Cancelar el registro
+          return;
         }
       }
     }
@@ -1387,9 +1357,6 @@ document.addEventListener('DOMContentLoaded', () => {
     transactions.push(newTransaction);
     saveToLocalStorage('nova_transactions', transactions);
     
-    // =============================================
-    // NUEVO: Actualizar caja con la nueva transacción
-    // =============================================
     updateCajaSaldoFromTransaction(newTransaction);
     
     updateUI();
@@ -1424,20 +1391,16 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('nova_transactions');
       localStorage.removeItem('nova_manual_sales_total');
       localStorage.removeItem('nova_created_advisors');
-      // =============================================
-      // NUEVO: Eliminar estado de caja
-      // =============================================
       localStorage.removeItem('nova_caja_saldo_inicial');
       localStorage.removeItem('nova_caja_saldo_actual');
+      localStorage.removeItem('nova_caja_fecha_activacion');
     } catch (e) { }
     transactions = [];
     manualSalesTotal = 0;
     createdAdvisors = [];
-    // =============================================
-    // NUEVO: Reiniciar estado de caja
-    // =============================================
     cajaSaldoInicial = null;
     cajaSaldoActual = 0;
+    cajaFechaActivacion = null;
     
     selectedTransactions.clear();
     updateUI();
@@ -1458,9 +1421,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCharts();
     renderTransactions();
     updateManualSalesTotal();
-    // =============================================
-    // NUEVO: Actualizar UI de caja en cada actualización
-    // =============================================
     updateCajaUI();
     checkForAlerts();
     updateAutomaticNote();
@@ -1470,9 +1430,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if ($('transaction-date')) $('transaction-date').value = DateTime.now().toISODate();
   
-  // =============================================
-  // NUEVO: Cargar estado de caja al iniciar
-  // =============================================
   loadCajaState();
   
   updateUI();
